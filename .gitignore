@@ -1,0 +1,15 @@
+*.user
+.DS_Store
+.idea/
+.vs/
+.vscode/
+.zed/
+CMakeUserPresets.json
+cmake-build-*/
+[bB]uild/
+_[bB]uild/
+deploy/
+_deploy/
+[lL]ib/
+[pP]ackage/
+venv/

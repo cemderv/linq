@@ -1,0 +1,20 @@
+---
+Checks: '-*,modernize-*,cppcoreguidelines-*,readability-identifier-naming,-modernize-use-trailing-return-type,-readability-make-member-function-const,-modernize-avoid-c-arrays,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-macro-usage,-modernize-use-nodiscard,-cppcoreguidelines-avoid-c-arrays,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-modernize-return-braced-init-list,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-type-const-cast,-modernize-loop-convert,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-type-static-cast-downcast,-readability-convert-member-functions-to-static,-cppcoreguidelines-avoid-non-const-global-variables,-cppcoreguidelines-avoid-do-while,-cppcoreguidelines-pro-type-vararg'
+WarningsAsErrors: 'true'
+CheckOptions:
+  - { key: readability-identifier-naming.NamespaceCase,          value: lower_case }
+  - { key: readability-identifier-naming.ClassCase,              value: lower_case }
+  - { key: readability-identifier-naming.PrivateMemberPrefix,    value: m_ }
+  - { key: readability-identifier-naming.StructCase,             value: lower_case }
+  - { key: readability-identifier-naming.FunctionCase,           value: lower_case }
+  - { key: readability-identifier-naming.VariableCase,           value: lower_case }
+  - { key: readability-identifier-naming.GlobalConstantCase,     value: lower_case }
+  - { key: readability-identifier-naming.ParameterCase,          value: lower_case }
+  - { key: readability-identifier-naming.TemplateParameterCase,  value: CamelCase }
+  - { key: readability-identifier-naming.StaticConstantPrefix,   value: s_ }
+  - { key: readability-identifier-naming.StaticConstantConstant, value: lower_case }
+  - { key: readability-identifier-naming.StaticVariablePrefix,   value: s_ }
+  - { key: readability-identifier-naming.StaticVariableConstant, value: lower_case }
+  - { key: readability-identifier-naming.GlobalVariableCase,     value: lower_case }
+  - { key: readability-identifier-naming.GlobalVariablePrefix,   value: s_ }
+...
