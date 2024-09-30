@@ -20,10 +20,6 @@
 #include <unordered_map>
 #include <vector>
 
-#ifdef __cpp_lib_span
-#include <span>
-#endif
-
 #ifdef __cpp_lib_concepts
 #include <concepts>
 #endif
@@ -2266,18 +2262,6 @@ template <typename T>
 [[nodiscard]] static auto from(std::initializer_list<T> list) {
   return details::initializer_list_range<T>{list};
 }
-
-#ifdef __cpp_lib_span
-template <typename T>
-[[nodiscard]] static auto from(std::span<const T> span) {
-  return details::container_copy_range<std::span<const T>>{span};
-}
-
-template <typename T>
-[[nodiscard]] static auto from(std::span<T> span) {
-  return details::container_copy_range<std::span<T>>{span};
-}
-#endif
 
 template <typename T>
 #ifdef __cpp_lib_concepts
