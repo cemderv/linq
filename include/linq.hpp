@@ -101,6 +101,7 @@ class then_by_range;
 // ----------------------------------
 
 #ifdef __cpp_lib_concepts
+// clang-format off
 template <typename T>
 concept number = std::integral<T> || std::floating_point<T>;
 
@@ -109,6 +110,14 @@ concept averageable = requires(T a, T b, size_t c) {
   { a / c } -> std::same_as<T>;
   a += b;
 };
+
+template <typename T>
+concept addable = requires(T a, T b) {
+  std::is_convertible_v<int, T>;
+  a += b;
+  a < b;
+};
+// clang-format on
 #endif
 
 template <typename T, typename TRange>
@@ -1640,69 +1649,45 @@ public:
   struct iterator {
     using output_t = T;
 
-    iterator(const T& value, const T& bound, const T& step)
-        : m_start(value)
-        , m_value(value)
-        , m_bound(bound)
+    iterator(output_t value, const output_t* step)
+        : m_value(std::move(value))
         , m_step(step) {
     }
 
     bool operator==(const iterator& o) const {
-      return m_value == o.m_value;
+      return o.m_value < m_value;
     }
 
     bool operator!=(const iterator& o) const {
-      return m_value != o.m_value;
+      return !(*this == o);
     }
 
     iterator& operator++() {
-      ++m_index;
+      m_value += *m_step;
       return *this;
     }
 
-    output_t operator*() const {
-      m_value = (m_step * m_index) + m_start;
-
-      if (m_step < T()) {
-        if (m_value < m_bound) {
-          m_value = m_bound;
-        }
-      }
-      else if (m_value > m_bound) {
-        m_value = m_bound;
-      }
-
+    const output_t& operator*() const {
       return m_value;
     }
 
-    int32_t   m_index{};
-    T         m_start;
-    mutable T m_value;
-    T         m_bound;
-    T         m_step;
+    output_t        m_value;
+    const output_t* m_step;
   };
 
-  from_to_range(const T& start, const T& end, const T& step)
-      : m_start(start)
-      , m_end(end)
-      , m_step(step) {
-    // Unsign the step value.
-    if (m_step < T()) {
-      m_step = -m_step;
-    }
-
-    // Invert the step value if we're going backwards.
-    if (m_start > m_end) {
-      m_step = -m_step;
-    }
+  from_to_range(T start, T end, T step)
+      : m_start(std::move(start))
+      , m_end(std::move(end))
+      , m_step(std::move(step)) {
+    assert(start < end);
   }
 
   iterator begin() const {
-    return iterator(m_start, m_end, m_step);
+    return iterator{m_start, std::addressof(m_step)};
   }
 
   iterator end() const {
-    return iterator(m_end, T(), T());
+    return iterator{m_end, std::addressof(m_step)};
   }
 
 private:
@@ -2305,11 +2290,11 @@ template <typename T>
 #endif
 
 template <typename T>
-LINQ_NODISCARD static auto from_to(const T& start, const T& end, const T& step = static_cast<T>(1)) {
-  static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>,
-                "Only integral and floating point types are supported by from_to().");
-
-  return details::from_to_range<T>(start, end, step);
+#ifdef __cpp_lib_concepts
+  requires(details::addable<T> || details::number<T>)
+#endif
+[[nodiscard]] static auto from_to(T start, T end, T step = T{1}) {
+  return details::from_to_range<T>(std::move(start), std::move(end), std::move(step));
 }
 
 template <typename TGenerator>
