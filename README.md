@@ -17,12 +17,10 @@ linq ...
 ## Example
 
 ```cpp
-#include <print>
-#include <string>
 #include <linq.hpp>
 
 struct Person {
-  std::string name;
+  string name;
   int age;
 };
 
@@ -34,13 +32,11 @@ int main() {
   };
   
   auto query = linq::from(&people)
-                    .where([](const Person& p) { return p.age > 20; });
+                    .where( [](const Person& p) { return p.age > 20; } );
                     
-  for (const auto& p : query) {
+  for (const Person& p : query) {
     println("{}, {}", p.name, p.age);
   }
-
-  return 0;
 }
 ```
 
