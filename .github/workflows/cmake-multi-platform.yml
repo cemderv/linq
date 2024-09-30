@@ -29,7 +29,7 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --config Release
 
       - name: Run Tests
-        run: ${{github.workspace}}/build/bin/linq_tests
+        run: ${{github.workspace}}/build/tests/linq_tests
 
 
   build-linux-clang16:
@@ -62,7 +62,7 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --config Release
 
       - name: Run Tests
-        run: ${{github.workspace}}/build/bin/linq_tests
+        run: ${{github.workspace}}/build/tests/linq_tests
 
   build-windows-vs2022:
     runs-on: windows-2022
@@ -77,7 +77,7 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --config Release
 
       - name: Run Tests
-        run: ${{github.workspace}}\build\bin\Release\linq_tests.exe
+        run: ${{github.workspace}}\build\tests\Release\linq_tests.exe
 
   build-macos-13:
     runs-on: macos-13
@@ -92,7 +92,7 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --config Release
 
       - name: Run Tests
-        run: ${{github.workspace}}/build/bin/Release/linq_tests
+        run: ${{github.workspace}}/build/tests/Release/linq_tests
 
 
   build-macos-14:
@@ -108,4 +108,4 @@ jobs:
         run: cmake --build ${{github.workspace}}/build --config Release
 
       - name: Run Tests
-        run: ${{github.workspace}}/build/bin/Release/linq_tests
+        run: ${{github.workspace}}/build/tests/Release/linq_tests
