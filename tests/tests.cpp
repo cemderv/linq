@@ -332,27 +332,86 @@ TEST_CASE("generate") {
 }
 
 TEST_CASE("distinct") {
+  const std::vector numbers{1, 2, 3, 3, 5, 4, 5, 6, 7};
+  const std::vector distinct_numbers = linq::from(&numbers).distinct().to_vector();
+
+  REQUIRE(distinct_numbers.size() == 7);
+  REQUIRE(distinct_numbers == std::vector{1, 2, 3, 5, 4, 6, 7});
 }
 
 TEST_CASE("select") {
+  const std::vector words{"some"s, "example"s, "words"s};
+  const std::vector result = linq::from(&words).select([](const std::string& word) { return word.at(0); }).to_vector();
+
+  REQUIRE(result.size() == 3);
+  REQUIRE(result == std::vector{'s', 'e', 'w'});
+}
+
+TEST_CASE("select_to_string") {
+  const std::vector numbers{1, 2, 3};
+
+  const std::vector result = linq::from(&numbers).select_to_string().to_vector();
+
+  REQUIRE(result.size() == 3);
+  REQUIRE(result == std::vector{"1"s, "2"s, "3"s});
 }
 
 TEST_CASE("select_many") {
+  struct value_type {
+    std::vector<int> favorite_numbers;
+  };
+
+  const std::vector<value_type> values{
+      {.favorite_numbers = {1, 2, 3, 4}},
+      {.favorite_numbers = {5, 6, 7, 8}},
+      {.favorite_numbers = {9, 10, 11, 12}},
+  };
+
+  const std::vector result =
+      linq::from(&values).select_many([](const value_type& p) { return linq::from(&p.favorite_numbers); }).to_vector();
+
+  REQUIRE(result.size() == 12);
+  REQUIRE(result == std::vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
 }
 
 TEST_CASE("reverse") {
+  const std::vector numbers{1, 2, 3, 4};
+  const std::vector result = linq::from(&numbers).reverse().to_vector();
+
+  REQUIRE(result.size() == 4);
+  REQUIRE(result == std::vector{4, 3, 2, 1});
 }
 
 TEST_CASE("take") {
+  const std::vector numbers{1, 2, 3, 4, 5, 6};
+  const std::vector result = linq::from(&numbers).take(3).to_vector();
+
+  REQUIRE(result.size() == 3);
+  REQUIRE(result == std::vector{1, 2, 3});
 }
 
 TEST_CASE("take_while") {
+  const std::vector numbers{1, 2, 3, 4, 5, 6};
+  const std::vector result = linq::from(&numbers).take_while([](int i) { return i < 5; }).to_vector();
+
+  REQUIRE(result.size() == 4);
+  REQUIRE(result == std::vector{1, 2, 3, 4});
 }
 
 TEST_CASE("skip") {
+  const std::vector numbers{1, 2, 3, 4, 5, 6};
+  const std::vector result = linq::from(&numbers).skip(3).to_vector();
+
+  REQUIRE(result.size() == 3);
+  REQUIRE(result == std::vector{4, 5, 6});
 }
 
 TEST_CASE("skip_while") {
+  const std::vector numbers{1, 2, 3, 4, 5, 6};
+  const std::vector result = linq::from(&numbers).skip_while([](int i) { return i < 5; }).to_vector();
+
+  REQUIRE(result.size() == 2);
+  REQUIRE(result == std::vector{5, 6});
 }
 
 TEST_CASE("append") {
@@ -393,36 +452,123 @@ TEST_CASE("append") {
     REQUIRE(all_nums.at(8) == 8);
     REQUIRE(all_nums.at(9) == 10);
   }
-
-  SECTION("cyclic append") {
-  }
 }
 
 TEST_CASE("repeat") {
+  SECTION("never repeat") {
+    const std::vector numbers = linq::from_to(0, 5).repeat(0).to_vector();
+
+    REQUIRE(numbers.size() == 6);
+    REQUIRE(numbers == std::vector{0, 1, 2, 3, 4, 5});
+  }
+
+  SECTION("repeat once") {
+    const std::vector numbers = linq::from_to(0, 5).repeat(1).to_vector();
+
+    REQUIRE(numbers.size() == 12);
+    REQUIRE(numbers == std::vector{0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5});
+  }
 }
 
 TEST_CASE("join") {
+  const std::vector<person> people1{
+      {.name = "P1", .age = 20},
+      {.name = "P2", .age = 21},
+      {.name = "P3", .age = 22},
+  };
+
+  const std::vector<person> people2{
+      {.name = "P1", .age = 22},
+      {.name = "P3", .age = 23},
+      {.name = "P1", .age = 26},
+  };
+
+  const std::vector result = linq::from(&people1)
+                                 .join(
+                                     linq::from(&people2),
+                                     [](const person& p) { return p.name; },
+                                     [](const person& p) { return p.name; },
+                                     [](const person& a, const person& b) {
+                                       return person{
+                                           .name = a.name + b.name,
+                                           .age  = a.age + b.age,
+                                       };
+                                     })
+                                 .to_vector();
 }
 
 TEST_CASE("order_by") {
+  const std::vector words = {"hello"s, "world"s, "here"s, "are"s, "some"s, "sorted"s, "words"s};
+
+  const std::vector result =
+      linq::from(&words)
+          .order_by([](const std::string& word) { return word.size(); }, linq::sort_direction::ascending)
+          .to_vector();
+
+  REQUIRE(result.size() == 7);
+  REQUIRE(result == std::vector{"are"s, "here"s, "some"s, "hello"s, "world"s, "words"s, "sorted"s});
 }
 
 TEST_CASE("order_by_ascending") {
+  const std::vector words = {"hello"s, "world"s, "here"s, "are"s, "some"s, "sorted"s, "words"s};
+
+  const std::vector result =
+      linq::from(&words).order_by_ascending([](const std::string& word) { return word.size(); }).to_vector();
+
+  REQUIRE(result.size() == 7);
+  REQUIRE(result == std::vector{"are"s, "here"s, "some"s, "hello"s, "world"s, "words"s, "sorted"s});
 }
 
 TEST_CASE("order_by_descending") {
+  const std::vector words = {"hello"s, "world"s, "here"s, "are"s, "some"s, "sorted"s, "words"s};
+
+  const std::vector result =
+      linq::from(&words).order_by_descending([](const std::string& word) { return word.size(); }).to_vector();
+
+  REQUIRE(result.size() == 7);
+  REQUIRE(result == std::vector{"sorted"s, "hello"s, "world"s, "words"s, "here"s, "some"s, "are"s});
 }
 
 TEST_CASE("then_by") {
+  const std::vector words = {"hello"s, "world"s, "here"s, "are"s, "some"s, "sorted"s, "words"s};
+
+  const std::vector result = linq::from(&words)
+                                 .order_by_ascending([](const std::string& word) { return word.size(); })
+                                 .then_by([](const std::string& word) { return word; }, linq::sort_direction::ascending)
+                                 .to_vector();
+
+  REQUIRE(result.size() == 7);
+  REQUIRE(result == std::vector{"are"s, "here"s, "some"s, "hello"s, "words"s, "world"s, "sorted"s});
 }
 
 TEST_CASE("then_by_ascending") {
+  const std::vector words = {"hello"s, "world"s, "here"s, "are"s, "some"s, "sorted"s, "words"s};
+
+  const std::vector result = linq::from(&words)
+                                 .order_by_ascending([](const std::string& word) { return word.size(); })
+                                 .then_by_ascending([](const std::string& word) { return word; })
+                                 .to_vector();
+
+  REQUIRE(result.size() == 7);
+  REQUIRE(result == std::vector{"are"s, "here"s, "some"s, "hello"s, "words"s, "world"s, "sorted"s});
 }
 
 TEST_CASE("then_by_descending") {
+  const std::vector words = {"hello"s, "world"s, "here"s, "are"s, "some"s, "sorted"s, "words"s};
+
+  const std::vector result = linq::from(&words)
+                                 .order_by_ascending([](const std::string& word) { return word.size(); })
+                                 .then_by_descending([](const std::string& word) { return word; })
+                                 .to_vector();
+
+  REQUIRE(result.size() == 7);
+  REQUIRE(result == std::vector{"are"s, "some"s, "here"s, "world"s, "words"s, "hello"s, "sorted"s});
 }
 
 TEST_CASE("sum") {
+  const std::vector   numbers{1, 2, 3, 4};
+  const std::optional sum = linq::from(&numbers).sum();
+  REQUIRE(sum.value() == 10);
 }
 
 TEST_CASE("min") {
@@ -504,27 +650,85 @@ TEST_CASE("average") {
 }
 
 TEST_CASE("aggregate") {
+  const std::vector numbers{1, 2, 3, 4};
+
+  const int result = linq::from(&numbers).aggregate([](int a, int b) { return a + b; });
+
+  REQUIRE(result == 10);
 }
 
 TEST_CASE("first") {
+  const std::vector numbers{1, 2, 3, 4};
+
+  const std::optional num1 = linq::from(&numbers).first();
+  const std::optional num2 = linq::from(&numbers).first([](int i) { return i > 2; });
+
+  REQUIRE(num1.value() == 1);
+  REQUIRE(num2.value() == 3);
 }
 
 TEST_CASE("last") {
+  const std::vector numbers{1, 2, 3, 4};
+
+  std::optional num1 = linq::from(&numbers).last();
+  std::optional num2 = linq::from(&numbers).last([](int i) { return i < 3; });
+
+  REQUIRE(num1.value() == 4);
+  REQUIRE(num1.value() == 2);
 }
 
 TEST_CASE("any") {
+  std::vector numbers{3, 2, 5, 7, 9};
+
+  bool test = linq::from(&numbers).any([](int i) { return (i % 2) == 0; });
+  REQUIRE(test == true);
+
+  numbers.clear();
+  test = linq::from(&numbers).any([](int i) { return (i % 2) == 0; });
+
+  REQUIRE(test == true);
+
+  numbers = {1};
+  test    = linq::from(&numbers).any([](int i) { return (i % 2) == 0; });
+
+  REQUIRE(test == false);
 }
 
 TEST_CASE("all") {
+  std::vector numbers{4, 3, 4, 3, 3};
+
+  bool test = linq::from(&numbers).all([](int i) { return i > 2; });
+  REQUIRE(test == true);
+
+  numbers.clear();
+  test = linq::from(&numbers).all([](int i) { return i > 2; });
+
+  REQUIRE(test == true);
+
+  numbers = {1};
+  test    = linq::from(&numbers).all([](int i) { return i > 2; });
+
+  REQUIRE(test == false);
 }
 
 TEST_CASE("count") {
+  const std::string str = "hello world!";
+
+  const size_t number_of_chars = linq::from(&str).count();
+  const size_t number_of_Ls    = linq::from(&str).count([](char ch) { return ch == 'l'; });
+
+  REQUIRE(number_of_chars == 12);
+  REQUIRE(number_of_Ls == 3);
 }
 
 TEST_CASE("element_at") {
-}
+  const std::vector numbers{1, 2, 3, 4};
 
-TEST_CASE("from_copy") {
+  const std::optional num1 = linq::from(&numbers).element_at(2);
+  const std::optional num2 = linq::from(&numbers).element_at(6);
+
+  REQUIRE(num1.value() == 3);
+  REQUIRE(num2.has_value() == false);
 }
 
 TEST_CASE("to_vector") {
