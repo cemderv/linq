@@ -44,4 +44,55 @@ int main() {
 }
 ```
 
+### Query Constructors
+
+- [from](https://github.com/cemderv/linq/wiki/Query-Constructors#from)
+- [from_mutable](https://github.com/cemderv/linq/wiki/Query-Constructors#from_mutable)
+- [from_copy](https://github.com/cemderv/linq/wiki/Query-Constructors#from_copy)
+
+### Container Producers
+
+- [to_vector](https://github.com/cemderv/linq/wiki/Container-Producers#to_vector)
+
+### Operators
+
+- [Aggregation](https://github.com/cemderv/linq/wiki/Aggregate-Operators)
+    - [aggregate](https://github.com/cemderv/linq/wiki/Aggregate-Operators#aggregate)
+    - [average](https://github.com/cemderv/linq/wiki/Aggregate-Operators#average)
+    - [count](https://github.com/cemderv/linq/wiki/Aggregate-Operators#count)
+    - [max](https://github.com/cemderv/linq/wiki/Aggregate-Operators#max)
+    - [min](https://github.com/cemderv/linq/wiki/Aggregate-Operators#min)
+    - [sum](https://github.com/cemderv/linq/wiki/Aggregate-Operators#sum)
+- [Concatenation](https://github.com/cemderv/linq/wiki/Concatenation-Operators)
+    - [append](https://github.com/cemderv/linq/wiki/Concatenation-Operators#append)
+- [Element Access](https://github.com/cemderv/linq/wiki/Element-Operators)
+    - [element_at](https://github.com/cemderv/linq/wiki/Element-Operators#element_at)
+    - [first](https://github.com/cemderv/linq/wiki/Element-Operators#first)
+    - [last](https://github.com/cemderv/linq/wiki/Element-Operators#last)
+- [Filters](https://github.com/cemderv/linq/wiki/Filter-Operators)
+    - [where](https://github.com/cemderv/linq/wiki/Filter-Operators#where)
+- [Generation](https://github.com/cemderv/linq/wiki/Generation-Operators)
+    - [from_to](https://github.com/cemderv/linq/wiki/Generation-Operators#from_to)
+    - [repeat](https://github.com/cemderv/linq/wiki/Generation-Operators#repeat)
+    - [generate](https://github.com/cemderv/linq/wiki/Generation-Operators#generate)
+- [Join](https://github.com/cemderv/linq/wiki/Join-Operators)
+    - [join](https://github.com/cemderv/linq/wiki/Join-Operators#join)
+- [Partition](https://github.com/cemderv/linq/wiki/Partition-Operators)
+    - [skip](https://github.com/cemderv/linq/wiki/Partition-Operators#skip)
+    - [skip_while](https://github.com/cemderv/linq/wiki/Partition-Operators#skip_while)
+    - [take](https://github.com/cemderv/linq/wiki/Partition-Operators#take)
+    - [take_while](https://github.com/cemderv/linq/wiki/Partition-Operators#take_while)
+- [Projection](https://github.com/cemderv/linq/wiki/Projection-Operators)
+    - [select](https://github.com/cemderv/linq/wiki/Projection-Operators#select)
+    - [select_to_string](https://github.com/cemderv/linq/wiki/Projection-Operators#select_to_string)
+    - [select_many](https://github.com/cemderv/linq/wiki/Projection-Operators#select_many)
+- [Quantifiers](https://github.com/cemderv/linq/wiki/Quantifier-Operators)
+    - [all](https://github.com/cemderv/linq/wiki/Quantifier-Operators#all)
+    - [any](https://github.com/cemderv/linq/wiki/Quantifier-Operators#any)
+- [Set](https://github.com/cemderv/linq/wiki/Set-Operators)
+    - [distinct](https://github.com/cemderv/linq/wiki/Set-Operators#distinct)
+- [Sorting](https://github.com/cemderv/linq/wiki/Sorting-Operators)
+    - [order_by](https://github.com/cemderv/linq/wiki/Sorting-Operators#order_by)
+    - [then_by](https://github.com/cemderv/linq/wiki/Sorting-Operators#then_by)
+    - [reverse](https://github.com/cemderv/linq/wiki/Sorting-Operators#reverse)
 
