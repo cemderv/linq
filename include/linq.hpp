@@ -479,9 +479,8 @@ public:
       return *this;
     }
 
-    const output_t& operator*() const {
-      const auto& transform = *m_parent->m_transform;
-      return transform(*m_begin);
+    output_t operator*() const {
+      return m_parent->m_transform(*m_begin);
     }
 
     const select_range* m_parent;
@@ -489,9 +488,9 @@ public:
     prev_iter_t         m_end;
   };
 
-  select_range(const TPrevRange& prev, const TTransform& transform)
+  select_range(const TPrevRange& prev, TTransform transform)
       : m_prev(prev)
-      , m_transform(&transform) {
+      , m_transform(std::move(transform)) {
   }
 
   iterator begin() const {
@@ -504,8 +503,8 @@ public:
   }
 
 private:
-  TPrevRange        m_prev;
-  const TTransform* m_transform{};
+  TPrevRange m_prev;
+  TTransform m_transform{};
 };
 
 // ----------------------------------
