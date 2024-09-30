@@ -16,7 +16,7 @@ jobs:
         run: |
           apt update -y
           apt upgrade -y
-          apt install -y cmake build-essential xorg-dev clang-tidy clang-tools
+          apt install -y cmake build-essential clang-tidy clang-tools
 
       - name: Configure CMake
         run: |
