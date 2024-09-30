@@ -1580,7 +1580,7 @@ private:
 // from_initializer_list
 // ----------------------------------
 
-template <typename T, typename TContainer = std::initializer_list<T>>
+template <typename T, typename TContainer = std::vector<T>>
 class initializer_list_range : public base_range<initializer_list_range<T>, typename TContainer::const_iterator> {
 public:
   struct iterator {
@@ -1612,7 +1612,7 @@ public:
   };
 
   explicit initializer_list_range(std::initializer_list<T> list)
-      : m_list(std::move(list)) {
+      : m_list(list.begin(), list.end()) {
   }
 
   iterator begin() const {
@@ -1624,7 +1624,7 @@ public:
   }
 
 private:
-  std::initializer_list<T> m_list{};
+  std::vector<T> m_list{};
 };
 
 // ----------------------------------
