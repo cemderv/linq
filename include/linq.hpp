@@ -13,9 +13,11 @@
 #include <algorithm>
 #include <cassert>
 #include <initializer_list>
+#include <map>
 #include <optional>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 
 #ifdef __cpp_lib_span
@@ -101,7 +103,6 @@ class then_by_range;
 // ----------------------------------
 
 #ifdef __cpp_lib_concepts
-// clang-format off
 template <typename T>
 concept number = std::integral<T> || std::floating_point<T>;
 
@@ -117,7 +118,6 @@ concept addable = requires(T a, T b) {
   a += b;
   a < b;
 };
-// clang-format on
 #endif
 
 template <typename T, typename TRange>
@@ -281,7 +281,11 @@ public:
 
   [[nodiscard]] std::optional<output_t> element_at(size_t index) const;
 
-  [[nodiscard]] auto to_vector() const;
+  [[nodiscard]] std::vector<output_t> to_vector() const;
+
+  [[nodiscard]] auto to_map() const;
+
+  [[nodiscard]] auto to_unordered_map() const;
 };
 
 // ----------------------------------
@@ -536,7 +540,7 @@ public:
       return *this;
     }
 
-    const output_t& operator*() const {
+    output_t operator*() const {
       return std::to_string(*m_begin);
     }
 
@@ -708,7 +712,7 @@ public:
     }
 
     const output_t& operator*() const {
-      return *m_prev_iterators->at(m_index);
+      return *m_prev_iterators[m_index];
     }
 
     const object_container* m_prev_iterators;
@@ -941,28 +945,29 @@ public:
     using output_t    = typename prev_iter_t::output_t;
 
     iterator(prev_iter_t begin, prev_iter_t end, const TPredicate& predicate)
-        : Begin(begin) {
-      while (Begin != end && predicate(*Begin))
-        ++Begin;
+        : m_begin(begin) {
+      while (m_begin != end && predicate(*m_begin)) {
+        ++m_begin;
+      }
     }
 
     bool operator==(const iterator& o) const {
-      return Begin == o.Begin;
+      return m_begin == o.m_begin;
     }
     bool operator!=(const iterator& o) const {
-      return Begin != o.Begin;
+      return m_begin != o.m_begin;
     }
 
     iterator& operator++() {
-      ++Begin;
+      ++m_begin;
       return *this;
     }
 
     const output_t& operator*() const {
-      return *Begin;
+      return *m_begin;
     }
 
-    prev_iter_t Begin;
+    prev_iter_t m_begin;
   };
 
   skip_while_range(const TPrevRange& prev, const TPredicate& predicate)
@@ -1700,17 +1705,9 @@ struct generator_return_value : generator_return_value_ident {
       : m_is_empty(true) {
   }
 
-  generator_return_value(T value)
+  explicit generator_return_value(T value)
       : m_value(std::move(value))
       , m_is_empty(false) {
-  }
-
-  explicit operator T&() {
-    return m_value;
-  }
-
-  explicit operator const T&() const {
-    return m_value;
   }
 
   bool operator==(const generator_return_value& o) const {
@@ -1757,8 +1754,7 @@ public:
       }
       else {
         // First iteration
-        const auto& generator = *m_parent->Generator;
-        m_last_result         = generator(m_iteration);
+        m_last_result = m_parent->m_generator(m_iteration);
       }
     }
 
@@ -1772,15 +1768,12 @@ public:
 
     iterator& operator++() {
       ++m_iteration;
-
-      const auto& generator = *m_parent->generator;
-      m_last_result         = generator(m_iteration);
-
+      m_last_result = m_parent->m_generator(m_iteration);
       return *this;
     }
 
     const output_t& operator*() const {
-      return m_last_result;
+      return m_last_result.m_value;
     }
 
     const generator_range* m_parent;
@@ -2122,7 +2115,7 @@ size_t base_range<TMy, TOutput>::count(const TPredicate& predicate) const {
 }
 
 template <typename TMy, typename TOutput>
-auto base_range<TMy, TOutput>::element_at(size_t index) const {
+std::optional<typename base_range<TMy, TOutput>::output_t> base_range<TMy, TOutput>::element_at(size_t index) const {
   size_t i{0};
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
@@ -2137,7 +2130,7 @@ auto base_range<TMy, TOutput>::element_at(size_t index) const {
 }
 
 template <typename TMy, typename TOutput>
-auto base_range<TMy, TOutput>::to_vector() const {
+std::vector<typename base_range<TMy, TOutput>::output_t> base_range<TMy, TOutput>::to_vector() const {
   std::vector<output_t> vec;
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
@@ -2147,6 +2140,27 @@ auto base_range<TMy, TOutput>::to_vector() const {
   return vec;
 }
 
+template <typename TMy, typename TOutput>
+auto base_range<TMy, TOutput>::to_map() const {
+  std::map<typename output_t::first_type, typename output_t::second_type> map;
+
+  for (const auto& [first, second] : static_cast<const TMy&>(*this)) {
+    map.emplace(first, second);
+  }
+
+  return map;
+}
+
+template <typename TMy, typename TOutput>
+auto base_range<TMy, TOutput>::to_unordered_map() const {
+  std::unordered_map<typename output_t::first_type, typename output_t::second_type> map;
+
+  for (const auto& [first, second] : static_cast<const TMy&>(*this)) {
+    map.emplace(first, second);
+  }
+
+  return map;
+}
 } // end namespace details
 
 // from()
@@ -2277,7 +2291,7 @@ template <typename TGenerator>
 
 template <typename T>
 [[nodiscard]] static details::generator_return_value<T> generate_return(T&& value) {
-  return {std::forward<T>(value)};
+  return details::generator_return_value{std::forward<T>(value)};
 }
 
 template <typename T>
