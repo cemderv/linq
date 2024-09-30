@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+using namespace std::literals;
+
 struct person {
   std::string name;
   int         age{};
@@ -534,6 +536,26 @@ TEST_CASE("to_vector") {
   REQUIRE(vec.at(1) == 2);
   REQUIRE(vec.at(2) == 3);
   REQUIRE(vec.at(3) == 4);
+}
+
+TEST_CASE("to_map") {
+  const std::array pairs{std::pair{"c"s, 1}, std::pair{"b"s, 2}, std::pair{"a"s, 3}};
+  const std::map   map = linq::from(&pairs).to_map();
+
+  REQUIRE(map.size() == 3);
+  REQUIRE(map.at("a") == 3);
+  REQUIRE(map.at("b") == 2);
+  REQUIRE(map.at("c") == 1);
+}
+
+TEST_CASE("to_unordered_map") {
+  const std::array         pairs{std::pair{"c"s, 1}, std::pair{"b"s, 2}, std::pair{"a"s, 3}};
+  const std::unordered_map map = linq::from(&pairs).to_unordered_map();
+
+  REQUIRE(map.size() == 3);
+  REQUIRE(map.at("a") == 3);
+  REQUIRE(map.at("b") == 2);
+  REQUIRE(map.at("c") == 1);
 }
 
 TEST_CASE("from(span)") {
