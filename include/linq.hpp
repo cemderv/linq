@@ -135,9 +135,7 @@ static auto calculate_average(const TRange& op) {
       std::conditional_t<std::is_integral<output_t>::value || std::is_floating_point_v<output_t>, float_t, output_t>;
 #endif
 
-  const auto maybe_sum_and_count = op.sum_and_count();
-
-  if (maybe_sum_and_count) {
+  if (const auto maybe_sum_and_count = op.sum_and_count()) {
     const auto& sum_and_count = *maybe_sum_and_count;
     return std::optional<return_t>{static_cast<return_t>(sum_and_count.first) / sum_and_count.second};
   }
@@ -257,25 +255,15 @@ public:
   template <typename TAccumFunc>
   [[nodiscard]] auto aggregate(const TAccumFunc& func) const;
 
-  [[nodiscard]] auto first() const;
-
-  [[nodiscard]] auto first_or(output_t&& default_value) const;
+  [[nodiscard]] std::optional<output_t> first() const;
 
   template <typename TPredicate>
-  [[nodiscard]] auto first(const TPredicate& predicate) const;
+  [[nodiscard]] std::optional<output_t> first(const TPredicate& predicate) const;
+
+  [[nodiscard]] std::optional<output_t> last() const;
 
   template <typename TPredicate>
-  [[nodiscard]] auto first_or(const TPredicate& predicate, output_t&& default_value) const;
-
-  [[nodiscard]] auto last() const;
-
-  [[nodiscard]] auto last_or(output_t&& default_value) const;
-
-  template <typename TPredicate>
-  [[nodiscard]] auto last(const TPredicate& predicate) const;
-
-  template <typename TPredicate>
-  [[nodiscard]] auto last_or(const TPredicate& predicate, output_t&& default_value) const;
+  [[nodiscard]] std::optional<output_t> last(const TPredicate& predicate) const;
 
   template <typename TPredicate>
   [[nodiscard]] bool any(const TPredicate& predicate) const;
@@ -291,7 +279,7 @@ public:
   template <typename TPredicate>
   [[nodiscard]] size_t count(const TPredicate& predicate) const;
 
-  [[nodiscard]] auto element_at(size_t index, output_t&& default_value) const;
+  [[nodiscard]] std::optional<output_t> element_at(size_t index) const;
 
   [[nodiscard]] auto to_vector() const;
 };
@@ -337,7 +325,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return *m_begin;
     }
 
@@ -421,7 +409,7 @@ public:
       return false;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return *m_begin;
     }
 
@@ -489,7 +477,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       const auto& transform = *m_parent->m_transform;
       return transform(*m_begin);
     }
@@ -548,7 +536,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return std::to_string(*m_begin);
     }
 
@@ -606,7 +594,7 @@ public:
         , m_end(end) {
       if (m_pos != m_end) {
         const auto& transform = m_parent->m_transform;
-        bool        first{true};
+        bool        first     = true;
 
         do {
           if (!first) {
@@ -654,7 +642,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return *m_ret_begin;
     }
 
@@ -719,7 +707,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return *m_prev_iterators->at(m_index);
     }
 
@@ -782,7 +770,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return *m_begin;
     }
 
@@ -853,7 +841,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return *m_begin;
     }
 
@@ -914,7 +902,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return *m_begin;
     }
 
@@ -970,7 +958,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return *Begin;
     }
 
@@ -1035,7 +1023,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return (m_my_begin != m_my_end) ? *m_my_begin : *m_other_begin;
     }
 
@@ -1102,7 +1090,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return *m_pos;
     }
 
@@ -1513,7 +1501,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    output_t& operator*() const {
       return *m_pos;
     }
 
@@ -1565,7 +1553,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    output_t& operator*() const {
       return *m_pos;
     }
 
@@ -1616,7 +1604,7 @@ public:
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return *m_pos;
     }
 
@@ -1712,8 +1700,8 @@ struct generator_return_value : generator_return_value_ident {
       : m_is_empty(true) {
   }
 
-  explicit generator_return_value(const T& value)
-      : m_value(value)
+  generator_return_value(T value)
+      : m_value(std::move(value))
       , m_is_empty(false) {
   }
 
@@ -1743,7 +1731,7 @@ struct generator_return_value : generator_return_value_ident {
 
 template <typename TGenerator>
 struct generate_range_traits {
-  using generator_return_type = std::invoke_result_t<TGenerator(size_t)>;
+  using generator_return_type = std::invoke_result_t<TGenerator, size_t>;
 
   // Ensure that whatever the generator returned is indeed of type generator_return_type.
   static_assert(std::is_base_of_v<generator_return_value_ident, generator_return_type>,
@@ -1751,16 +1739,16 @@ struct generate_range_traits {
                 "linq::generate_finish().");
 
   // The type that is wrapped by the returned generator_return_type.
-  using core_type = typename generator_return_type::value_type;
+  using value_type = typename generator_return_type::value_type;
 };
 
 template <typename TGenerator>
 class generator_range
-    : public base_range<generator_range<TGenerator>, typename generate_range_traits<TGenerator>::core_type> {
+    : public base_range<generator_range<TGenerator>, typename generate_range_traits<TGenerator>::value_type> {
 public:
   struct iterator {
     using generator_return_type = typename generate_range_traits<TGenerator>::generator_return_type;
-    using output_t              = typename generate_range_traits<TGenerator>::core_type;
+    using output_t              = typename generate_range_traits<TGenerator>::value_type;
 
     iterator(const generator_range* parent, bool is_end)
         : m_parent(parent) {
@@ -1785,13 +1773,13 @@ public:
     iterator& operator++() {
       ++m_iteration;
 
-      const auto& generator = *m_parent->Generator;
+      const auto& generator = *m_parent->generator;
       m_last_result         = generator(m_iteration);
 
       return *this;
     }
 
-    output_t operator*() const {
+    const output_t& operator*() const {
       return m_last_result;
     }
 
@@ -1913,7 +1901,7 @@ auto base_range<TMy, TOutput>::then_by(const TKeySelector& key_selector, sort_di
 
 template <typename TMy, typename TOutput>
 auto base_range<TMy, TOutput>::sum() const {
-  bool     first{true};
+  bool     first = true;
   output_t result{};
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
@@ -1931,7 +1919,7 @@ auto base_range<TMy, TOutput>::sum() const {
 
 template <typename TMy, typename TOutput>
 auto base_range<TMy, TOutput>::min() const {
-  bool     first{true};
+  bool     first = true;
   output_t result{};
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
@@ -1949,7 +1937,7 @@ auto base_range<TMy, TOutput>::min() const {
 
 template <typename TMy, typename TOutput>
 auto base_range<TMy, TOutput>::max() const {
-  bool     first{true};
+  bool     first = true;
   output_t result{};
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
@@ -1967,7 +1955,7 @@ auto base_range<TMy, TOutput>::max() const {
 
 template <typename TMy, typename TOutput>
 auto base_range<TMy, TOutput>::sum_and_count() const {
-  bool     first{true};
+  bool     first = true;
   output_t result{};
   size_t   count{0};
 
@@ -1998,7 +1986,7 @@ auto base_range<TMy, TOutput>::average() const
 template <typename TMy, typename TOutput>
 template <typename TAccumFunc>
 auto base_range<TMy, TOutput>::aggregate(const TAccumFunc& func) const {
-  bool     first{true};
+  bool     first = true;
   output_t sum{};
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
@@ -2015,75 +2003,55 @@ auto base_range<TMy, TOutput>::aggregate(const TAccumFunc& func) const {
 }
 
 template <typename TMy, typename TOutput>
-auto base_range<TMy, TOutput>::first() const {
+std::optional<typename base_range<TMy, TOutput>::output_t> base_range<TMy, TOutput>::first() const {
   for (const auto& p : static_cast<const TMy&>(*this)) {
-    return std::optional<output_t>{p};
+    return std::optional{p};
   }
 
-  return std::optional<output_t>{};
-}
-
-template <typename TMy, typename TOutput>
-auto base_range<TMy, TOutput>::first_or(output_t&& default_value) const {
-  return this->first().value_or(std::forward<output_t>(default_value));
+  return {};
 }
 
 template <typename TMy, typename TOutput>
 template <typename TPredicate>
-auto base_range<TMy, TOutput>::first(const TPredicate& predicate) const {
+std::optional<typename base_range<TMy, TOutput>::output_t>
+base_range<TMy, TOutput>::first(const TPredicate& predicate) const {
   for (const auto& p : static_cast<const TMy&>(*this)) {
     if (predicate(p)) {
-      return std::optional<output_t>{p};
+      return std::optional{p};
     }
   }
 
-  return std::optional<output_t>{};
+  return {};
 }
 
 template <typename TMy, typename TOutput>
-template <typename TPredicate>
-auto base_range<TMy, TOutput>::first_or(const TPredicate& predicate, output_t&& default_value) const {
-  return this->first(predicate).value_or(std::forward<output_t>(default_value));
-}
-
-template <typename TMy, typename TOutput>
-auto base_range<TMy, TOutput>::last() const {
-  bool     first{true};
+std::optional<typename base_range<TMy, TOutput>::output_t> base_range<TMy, TOutput>::last() const {
+  bool     have_any = false;
   output_t ret{};
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
-    ret   = p;
-    first = false;
+    ret      = p;
+    have_any = true;
   }
 
-  return first ? std::optional<output_t>{} : std::optional<output_t>{ret};
-}
-
-template <typename TMy, typename TOutput>
-auto base_range<TMy, TOutput>::last_or(output_t&& default_value) const {
-  return this->last().value_or(std::forward<output_t>(default_value));
+  return have_any ? std::optional{ret} : std::optional<output_t>{};
 }
 
 template <typename TMy, typename TOutput>
 template <typename TPredicate>
-auto base_range<TMy, TOutput>::last(const TPredicate& predicate) const {
-  bool     first{true};
+std::optional<typename base_range<TMy, TOutput>::output_t>
+base_range<TMy, TOutput>::last(const TPredicate& predicate) const {
+  bool     have_any = false;
   output_t ret{};
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
     if (predicate(p)) {
-      ret   = p;
-      first = false;
+      ret      = p;
+      have_any = true;
     }
   }
 
-  return first ? std::optional<output_t>{} : std::optional<output_t>{ret};
-}
-
-template <typename TMy, typename TOutput>
-template <typename TPredicate>
-auto base_range<TMy, TOutput>::last_or(const TPredicate& predicate, output_t&& default_value) const {
-  return this->last(predicate).value_or(std::forward<output_t>(default_value));
+  return have_any ? std::optional{ret} : std::optional<output_t>{};
 }
 
 template <typename TMy, typename TOutput>
@@ -2113,8 +2081,8 @@ bool base_range<TMy, TOutput>::all(const TPredicate& predicate) const {
 template <typename TMy, typename TOutput>
 template <typename TPredicate>
 bool base_range<TMy, TOutput>::none(const TPredicate& predicate) const {
-  bool any_elements{false};
-  bool any_none{false};
+  bool any_elements = false;
+  bool any_none     = false;
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
     any_elements = true;
@@ -2154,18 +2122,18 @@ size_t base_range<TMy, TOutput>::count(const TPredicate& predicate) const {
 }
 
 template <typename TMy, typename TOutput>
-auto base_range<TMy, TOutput>::element_at(size_t index, output_t&& default_value) const {
+auto base_range<TMy, TOutput>::element_at(size_t index) const {
   size_t i{0};
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
     if (i >= index) {
-      return p;
+      return std::optional{p};
     }
 
     ++i;
   }
 
-  return default_value;
+  return {};
 }
 
 template <typename TMy, typename TOutput>
@@ -2287,6 +2255,11 @@ template <typename T>
 [[nodiscard]] static auto from(std::span<const T> span) {
   return details::container_copy_range<std::span<const T>>{span};
 }
+
+template <typename T>
+[[nodiscard]] static auto from(std::span<T> span) {
+  return details::container_copy_range<std::span<T>>{span};
+}
 #endif
 
 template <typename T>
@@ -2298,17 +2271,17 @@ template <typename T>
 }
 
 template <typename TGenerator>
-[[nodiscard]] static auto generate(const TGenerator& generator) {
-  return details::generator_range<TGenerator>(generator);
+[[nodiscard]] static details::generator_range<TGenerator> generate(TGenerator&& generator) {
+  return details::generator_range<TGenerator>{std::forward<TGenerator>(generator)};
 }
 
 template <typename T>
-[[nodiscard]] static auto generate_return(const T& value) {
-  return details::generator_return_value<T>(value);
+[[nodiscard]] static details::generator_return_value<T> generate_return(T&& value) {
+  return {std::forward<T>(value)};
 }
 
 template <typename T>
-[[nodiscard]] static auto generate_finish() {
-  return details::generator_return_value<T>();
+[[nodiscard]] static details::generator_return_value<T> generate_finish() {
+  return {};
 }
 } // end namespace linq
