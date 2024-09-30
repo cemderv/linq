@@ -761,9 +761,11 @@ TEST_CASE("to_unordered_map") {
   REQUIRE(map.at("c") == 1);
 }
 
+#ifdef __cpp_lib_span
 TEST_CASE("from(span)") {
   const std::array           nums{1, 2, 3, 4};
   const std::span<const int> nums_span{nums};
   const auto                 query = linq::from(nums_span);
   const std::vector          vec   = query.to_vector();
 }
+#endif
