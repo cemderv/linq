@@ -14,7 +14,7 @@ linq ...
 - does not rely on exceptions and instead reports errors at compile-time
 - uses the beloved dot operator!
 
-## Usage
+## Example
 
 ```cpp
 #include <print>
@@ -27,7 +27,7 @@ struct Person {
 };
 
 int main() {
-  const std::vector<Person> people {
+  const vector<Person> people {
     { .name = "P1", .age = 20 },
     { .name = "P2", .age = 21 },
     { .name = "P3", .age = 22 },
@@ -37,10 +37,11 @@ int main() {
                     .where([](const Person& p) { return p.age > 20; });
                     
   for (const auto& p : query) {
-    std::println("{}, {}", p.name, p.age);
+    println("{}, {}", p.name, p.age);
   }
 
   return 0;
 }
 ```
+
 
