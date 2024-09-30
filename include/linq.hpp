@@ -159,10 +159,9 @@ class sorting_range {
 
 /**
  * @brief Represents the base class of all LINQ ranges.
- * @tparam TMy The fully qualified type of the range.
  * @tparam TOutput The full, unmodified type that is returned by the range.
  */
-template <typename TMy, typename TOutput>
+template <typename /*TMy*/, typename TOutput>
 class base_range : public base_range_ident {
 public:
   // Return non-const, non-volatile, non-reference types from methods such as sum, min and max.
@@ -184,24 +183,24 @@ public:
   [[nodiscard]] auto distinct() const;
 
   template <typename TTransform>
-  [[nodiscard]] auto select(const TTransform& transform) const;
+  [[nodiscard]] auto select(TTransform&& transform) const;
 
   [[nodiscard]] auto select_to_string() const;
 
   template <typename TTransform>
-  [[nodiscard]] auto select_many(const TTransform& transform) const;
+  [[nodiscard]] auto select_many(TTransform&& transform) const;
 
   [[nodiscard]] auto reverse() const;
 
   [[nodiscard]] auto take(size_t count) const;
 
   template <typename TPredicate>
-  [[nodiscard]] auto take_while(const TPredicate& predicate) const;
+  [[nodiscard]] auto take_while(TPredicate&& predicate) const;
 
   [[nodiscard]] auto skip(size_t count) const;
 
   template <typename TPredicate>
-  [[nodiscard]] auto skip_while(const TPredicate& predicate) const;
+  [[nodiscard]] auto skip_while(TPredicate&& predicate) const;
 
   template <typename TOtherRange>
   [[nodiscard]] auto append(const TOtherRange& other_range) const;
@@ -209,35 +208,35 @@ public:
   [[nodiscard]] auto repeat(size_t count) const;
 
   template <typename TOtherRange, typename TKeySelectorA, typename TKeySelectorB, typename TTransform>
-  [[nodiscard]] auto join(const TOtherRange&   other_range,
-                          const TKeySelectorA& key_selector_a,
-                          const TKeySelectorB& key_selector_b,
-                          const TTransform&    transform) const;
+  [[nodiscard]] auto join(const TOtherRange& other_range,
+                          TKeySelectorA&&    key_selector_a,
+                          TKeySelectorB&&    key_selector_b,
+                          TTransform&&       transform) const;
 
   template <typename TKeySelector>
-  [[nodiscard]] auto order_by(const TKeySelector& key_selector, sort_direction sort_dir) const;
+  [[nodiscard]] auto order_by(TKeySelector&& key_selector, sort_direction sort_dir) const;
 
   template <typename TKeySelector>
-  [[nodiscard]] auto order_by_ascending(const TKeySelector& key_selector) const {
-    return order_by<TKeySelector>(key_selector, sort_direction::ascending);
+  [[nodiscard]] auto order_by_ascending(TKeySelector&& key_selector) const {
+    return order_by<TKeySelector>(std::forward<TKeySelector>(key_selector), sort_direction::ascending);
   }
 
   template <typename TKeySelector>
-  [[nodiscard]] auto order_by_descending(const TKeySelector& key_selector) const {
-    return order_by<TKeySelector>(key_selector, sort_direction::descending);
+  [[nodiscard]] auto order_by_descending(TKeySelector&& key_selector) const {
+    return order_by<TKeySelector>(std::forward<TKeySelector>(key_selector), sort_direction::descending);
   }
 
   template <typename TKeySelector>
-  [[nodiscard]] auto then_by(const TKeySelector& key_selector, sort_direction sort_dir) const;
+  [[nodiscard]] auto then_by(TKeySelector&& key_selector, sort_direction sort_dir) const;
 
   template <typename TKeySelector>
-  [[nodiscard]] auto then_by_ascending(const TKeySelector& key_selector) const {
-    return then_by<TKeySelector>(key_selector, sort_direction::ascending);
+  [[nodiscard]] auto then_by_ascending(TKeySelector&& key_selector) const {
+    return then_by<TKeySelector>(std::forward<TKeySelector>(key_selector), sort_direction::ascending);
   }
 
   template <typename TKeySelector>
-  [[nodiscard]] auto then_by_descending(const TKeySelector& key_selector) const {
-    return then_by<TKeySelector>(key_selector, sort_direction::descending);
+  [[nodiscard]] auto then_by_descending(TKeySelector&& key_selector) const {
+    return then_by<TKeySelector>(std::forward<TKeySelector>(key_selector), sort_direction::descending);
   }
 
   [[nodiscard]] auto sum() const;
@@ -393,7 +392,7 @@ public:
     iterator& operator++() {
       do {
         ++m_begin;
-      } while (m_begin != m_end && ontains_object(m_begin));
+      } while (m_begin != m_end && contains_object(m_begin));
 
       if (m_begin != m_end)
         m_encountered_objects->push_back(m_begin);
@@ -422,7 +421,6 @@ public:
     object_container* m_encountered_objects;
   };
 
-public:
   distinct_range() = default;
 
   explicit distinct_range(const TPrevRange& prev)
@@ -430,12 +428,12 @@ public:
   }
 
   iterator begin() const {
-    return iterator(m_prev.begin(), m_prev.end(), &m_encountered_objects);
+    return iterator{m_prev.begin(), m_prev.end(), std::addressof(m_encountered_objects)};
   }
 
   iterator end() const {
     const auto prev_end = m_prev.end();
-    return iterator(prev_end, &m_encountered_objects);
+    return iterator{prev_end, prev_end, std::addressof(m_encountered_objects)};
   }
 
 private:
@@ -594,8 +592,8 @@ public:
 
     iterator(const select_many_range* parent, prev_iter_t pos, prev_iter_t end)
         : m_parent(parent)
-        , m_pos(pos)
-        , m_end(end) {
+        , m_pos(std::move(pos))
+        , m_end(std::move(end)) {
       if (m_pos != m_end) {
         const auto& transform = m_parent->m_transform;
         bool        first     = true;
@@ -635,11 +633,11 @@ public:
       if (m_ret_begin == m_ret_end) {
         // Move our parent iterator forward to get the next container.
         ++m_pos;
+
         if (m_pos != m_end) {
-          const auto& transform = m_parent->Transform;
-          m_ret_range           = transform(*m_pos);
-          m_ret_begin           = m_ret_range.begin();
-          m_ret_end             = m_ret_range.end();
+          m_ret_range = m_parent->m_transform(*m_pos);
+          m_ret_begin = m_ret_range.begin();
+          m_ret_end   = m_ret_range.end();
         }
       }
 
@@ -712,7 +710,7 @@ public:
     }
 
     const output_t& operator*() const {
-      return *m_prev_iterators[m_index];
+      return *(*m_prev_iterators)[m_index];
     }
 
     const object_container* m_prev_iterators;
@@ -736,7 +734,7 @@ public:
   }
 
   iterator end() const {
-    return iterator{nullptr, -1};
+    return iterator{nullptr, static_cast<size_t>(-1)};
   }
 
 private:
@@ -1029,7 +1027,7 @@ public:
     }
 
     const output_t& operator*() const {
-      return (m_my_begin != m_my_end) ? *m_my_begin : *m_other_begin;
+      return m_my_begin != m_my_end ? *m_my_begin : *m_other_begin;
     }
 
     prev_iter_t        m_my_begin;
@@ -1131,7 +1129,7 @@ private:
 // Determines the output of a selection in the join range.
 template <typename TRangeA, typename TRangeB, typename TTransform>
 using join_output_t =
-    std::invoke_result_t<TTransform(typename TRangeA::iterator::output_t, typename TRangeB::iterator::output_t)>;
+    std::invoke_result_t<TTransform, typename TRangeA::iterator::output_t, typename TRangeB::iterator::output_t>;
 
 // Nested loop inner join operator.
 template <typename TPrevRange,
@@ -1176,8 +1174,7 @@ public:
     }
 
     output_t operator*() const {
-      const auto& transform = *m_parent->Transform;
-      return transform(*m_pos, *m_other_pos);
+      return m_parent->m_transform(*m_pos, *m_other_pos);
     }
 
     prev_iter_t m_begin;
@@ -1193,19 +1190,19 @@ public:
   private:
     // Finds the next match in both ranges using the key selectors and == comparison.
     void find_next(bool pre_increment_other) {
-      const auto& key_selector_a = *m_parent->KeySelectorA;
-      const auto& key_selector_b = *m_parent->KeySelectorB;
+      const auto& key_selector_a = m_parent->m_key_selector_a;
+      const auto& key_selector_b = m_parent->m_key_selector_b;
 
       if (pre_increment_other) {
         ++m_other_pos;
       }
 
       while (m_pos != m_end) {
-        bool        should_continue = true;
-        const auto& key_a           = key_selector_a(*m_pos);
+        bool       should_continue = true;
+        const auto key_a           = key_selector_a(*m_pos);
 
         while (m_other_pos != m_other_end) {
-          const auto& key_b = key_selector_b(*m_other_pos);
+          const auto key_b = key_selector_b(*m_other_pos);
 
           if (key_a == key_b) {
             should_continue = false;
@@ -1228,16 +1225,16 @@ public:
     }
   };
 
-  join_range(const TPrevRange&    prev,
-             TOtherRange          other_range,
-             const TKeySelectorA& key_selector_a,
-             const TKeySelectorB& key_selector_b,
-             const TTransform&    transform)
+  join_range(const TPrevRange& prev,
+             TOtherRange       other_range,
+             TKeySelectorA     key_selector_a,
+             TKeySelectorB     key_selector_b,
+             TTransform        transform)
       : m_prev(prev)
       , m_other_range(other_range)
-      , m_key_selector_a(&key_selector_a)
-      , m_key_selector_b(&key_selector_b)
-      , m_transform(&transform) {
+      , m_key_selector_a(std::move(key_selector_a))
+      , m_key_selector_b(std::move(key_selector_b))
+      , m_transform(std::move(transform)) {
   }
 
   iterator begin() const {
@@ -1250,11 +1247,11 @@ public:
   }
 
 private:
-  TPrevRange           m_prev;
-  TOtherRange          m_other_range;
-  const TKeySelectorA* m_key_selector_a;
-  const TKeySelectorB* m_key_selector_b;
-  const TTransform*    m_transform;
+  TPrevRange    m_prev;
+  TOtherRange   m_other_range;
+  TKeySelectorA m_key_selector_a;
+  TKeySelectorB m_key_selector_b;
+  TTransform    m_transform;
 };
 
 // ----------------------------------
@@ -1297,9 +1294,9 @@ public:
     container_iter_t m_pos;
   };
 
-  order_by_range(const TPrevRange& prev, const TKeySelector& key_selector, sort_direction sort_dir)
+  order_by_range(const TPrevRange& prev, TKeySelector key_selector, sort_direction sort_dir)
       : m_prev(prev)
-      , m_key_selector(&key_selector)
+      , m_key_selector(std::move(key_selector))
       , m_sort_direction(sort_dir) {
   }
 
@@ -1312,7 +1309,7 @@ public:
 
     std::sort(m_sorted_values.begin(),
               m_sorted_values.end(),
-              [this](const container_element_t& a, const container_element_t& b) { return this->compare_keys(a, b); });
+              [this](const container_element_t& a, const container_element_t& b) { return compare_keys(a, b); });
 
     return iterator(m_sorted_values.begin());
   }
@@ -1322,16 +1319,15 @@ public:
   }
 
   bool compare_keys(const container_element_t& a, const container_element_t& b) const {
-    const auto& key_selector = *m_key_selector;
-    const auto& a_val        = key_selector(a);
-    const auto& b_val        = key_selector(b);
+    const auto a_val = m_key_selector(a);
+    const auto b_val = m_key_selector(b);
 
-    return m_sort_direction == sort_direction::ascending ? /*ascending:*/ a_val < b_val : /*descending:*/ b_val < a_val;
+    return m_sort_direction == sort_direction::ascending ? /*ascending:*/ a_val < b_val : /*descending:*/ a_val > b_val;
   }
 
 private:
   TPrevRange          m_prev;
-  const TKeySelector* m_key_selector;
+  TKeySelector        m_key_selector;
   sort_direction      m_sort_direction;
   mutable container_t m_sorted_values;
 };
@@ -1379,16 +1375,17 @@ public:
     container_iter_t m_pos;
   };
 
-  then_by_range(const TPrevRange& prev, const TKeySelector& key_selector, sort_direction sort_dir)
+  then_by_range(const TPrevRange& prev, TKeySelector key_selector, sort_direction sort_dir)
       : m_prev(prev)
-      , m_key_selector(&key_selector)
+      , m_key_selector(std::move(key_selector))
       , m_sort_direction(sort_dir) {
   }
 
   iterator begin() const {
     m_sorted_values.clear();
-    for (const auto& val : m_prev)
-      m_sorted_values.push_back(val);
+    for (const auto& val : m_prev) {
+      m_sorted_values.emplace_back(val);
+    }
 
     std::sort(m_sorted_values.begin(),
               m_sorted_values.end(),
@@ -1402,9 +1399,8 @@ public:
   }
 
   bool compare_keys(const container_element_t& a, const container_element_t& b) const {
-    const auto& key_selector = *m_key_selector;
-    const auto& a_value      = key_selector(a);
-    const auto& b_value      = key_selector(b);
+    const auto a_value = m_key_selector(a);
+    const auto b_value = m_key_selector(b);
 
     if (m_prev.compare_keys(a, b)) {
       return true;
@@ -1420,7 +1416,7 @@ public:
 
 private:
   TPrevRange          m_prev;
-  const TKeySelector* m_key_selector;
+  TKeySelector        m_key_selector;
   sort_direction      m_sort_direction;
   mutable container_t m_sorted_values;
 };
@@ -1435,6 +1431,8 @@ public:
   struct iterator {
     using container_iter_t = typename TContainer::const_iterator;
     using output_t         = typename TContainer::const_reference;
+
+    iterator() = default;
 
     explicit iterator(container_iter_t pos)
         : m_pos(pos) {
@@ -1457,8 +1455,10 @@ public:
       return *m_pos;
     }
 
-    container_iter_t m_pos;
+    container_iter_t m_pos{};
   };
+
+  container_range() = default;
 
   explicit container_range(const TContainer* container)
       : m_container(container) {
@@ -1814,8 +1814,8 @@ auto base_range<TMy, TOutput>::distinct() const {
 
 template <typename TMy, typename TOutput>
 template <typename TTransform>
-auto base_range<TMy, TOutput>::select(const TTransform& transform) const {
-  return select_range<TMy, TTransform>(static_cast<const TMy&>(*this), transform);
+auto base_range<TMy, TOutput>::select(TTransform&& transform) const {
+  return select_range<TMy, TTransform>(static_cast<const TMy&>(*this), std::forward<TTransform>(transform));
 }
 
 template <typename TMy, typename TOutput>
@@ -1825,8 +1825,8 @@ template <typename TMy, typename TOutput>
 
 template <typename TMy, typename TOutput>
 template <typename TTransform>
-auto base_range<TMy, TOutput>::select_many(const TTransform& transform) const {
-  return select_many_range<TMy, TTransform>(static_cast<const TMy&>(*this), transform);
+auto base_range<TMy, TOutput>::select_many(TTransform&& transform) const {
+  return select_many_range<TMy, TTransform>(static_cast<const TMy&>(*this), std::forward<TTransform>(transform));
 }
 
 template <typename TMy, typename TOutput>
@@ -1841,8 +1841,8 @@ auto base_range<TMy, TOutput>::take(size_t count) const {
 
 template <typename TMy, typename TOutput>
 template <typename TPredicate>
-auto base_range<TMy, TOutput>::take_while(const TPredicate& predicate) const {
-  return take_while_range<TMy, TPredicate>(static_cast<const TMy&>(*this), predicate);
+auto base_range<TMy, TOutput>::take_while(TPredicate&& predicate) const {
+  return take_while_range<TMy, TPredicate>(static_cast<const TMy&>(*this), std::forward<TPredicate>(predicate));
 }
 
 template <typename TMy, typename TOutput>
@@ -1852,8 +1852,8 @@ auto base_range<TMy, TOutput>::skip(size_t count) const {
 
 template <typename TMy, typename TOutput>
 template <typename TPredicate>
-auto base_range<TMy, TOutput>::skip_while(const TPredicate& predicate) const {
-  return skip_while_range<TMy, TPredicate>(static_cast<const TMy&>(*this), predicate);
+auto base_range<TMy, TOutput>::skip_while(TPredicate&& predicate) const {
+  return skip_while_range<TMy, TPredicate>(static_cast<const TMy&>(*this), std::forward<TPredicate>(predicate));
 }
 
 template <typename TMy, typename TOutput>
@@ -1869,27 +1869,31 @@ auto base_range<TMy, TOutput>::repeat(size_t count) const {
 
 template <typename TMy, typename TOutput>
 template <typename TOtherRange, typename TKeySelectorA, typename TKeySelectorB, typename TTransform>
-auto base_range<TMy, TOutput>::join(const TOtherRange&   other_range,
-                                    const TKeySelectorA& key_selector_a,
-                                    const TKeySelectorB& key_selector_b,
-                                    const TTransform&    transform) const {
+auto base_range<TMy, TOutput>::join(const TOtherRange& other_range,
+                                    TKeySelectorA&&    key_selector_a,
+                                    TKeySelectorB&&    key_selector_b,
+                                    TTransform&&       transform) const {
   return join_range<TMy, TOtherRange, TKeySelectorA, TKeySelectorB, TTransform>(static_cast<const TMy&>(*this),
                                                                                 other_range,
-                                                                                key_selector_a,
-                                                                                key_selector_b,
-                                                                                transform);
+                                                                                std::move(key_selector_a),
+                                                                                std::move(key_selector_b),
+                                                                                std::move(transform));
 }
 
 template <typename TMy, typename TOutput>
 template <typename TKeySelector>
-auto base_range<TMy, TOutput>::order_by(const TKeySelector& key_selector, sort_direction sort_dir) const {
-  return order_by_range<TMy, TKeySelector>(static_cast<const TMy&>(*this), key_selector, sort_dir);
+auto base_range<TMy, TOutput>::order_by(TKeySelector&& key_selector, sort_direction sort_dir) const {
+  return order_by_range<TMy, TKeySelector>(static_cast<const TMy&>(*this),
+                                           std::forward<TKeySelector>(key_selector),
+                                           sort_dir);
 }
 
 template <typename TMy, typename TOutput>
 template <typename TKeySelector>
-auto base_range<TMy, TOutput>::then_by(const TKeySelector& key_selector, sort_direction sort_dir) const {
-  return then_by_range<TMy, TKeySelector>(static_cast<const TMy&>(*this), key_selector, sort_dir);
+auto base_range<TMy, TOutput>::then_by(TKeySelector&& key_selector, sort_direction sort_dir) const {
+  return then_by_range<TMy, TKeySelector>(static_cast<const TMy&>(*this),
+                                          std::forward<TKeySelector>(key_selector),
+                                          sort_dir);
 }
 
 template <typename TMy, typename TOutput>
@@ -2134,7 +2138,7 @@ std::vector<typename base_range<TMy, TOutput>::output_t> base_range<TMy, TOutput
   std::vector<output_t> vec;
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
-    vec.push_back(p);
+    vec.emplace_back(p);
   }
 
   return vec;
