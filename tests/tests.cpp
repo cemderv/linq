@@ -505,7 +505,13 @@ TEST_CASE("order_by") {
           .to_vector();
 
   REQUIRE(result.size() == 7);
-  REQUIRE(result == std::vector{"are"s, "here"s, "some"s, "hello"s, "world"s, "words"s, "sorted"s});
+  REQUIRE(result.at(0) == "are");
+  REQUIRE(result.at(1) == "here");
+  REQUIRE(result.at(2) == "some");
+  REQUIRE(result.at(3) == "hello");
+  REQUIRE(result.at(4) == "world");
+  REQUIRE(result.at(5) == "words");
+  REQUIRE(result.at(6) == "sorted");
 }
 
 TEST_CASE("order_by_ascending") {
@@ -515,7 +521,13 @@ TEST_CASE("order_by_ascending") {
       linq::from(&words).order_by_ascending([](const std::string& word) { return word.size(); }).to_vector();
 
   REQUIRE(result.size() == 7);
-  REQUIRE(result == std::vector{"are"s, "here"s, "some"s, "hello"s, "world"s, "words"s, "sorted"s});
+  REQUIRE(result.at(0) == "are");
+  REQUIRE(result.at(1) == "here");
+  REQUIRE(result.at(2) == "some");
+  REQUIRE(result.at(3) == "hello");
+  REQUIRE(result.at(4) == "world");
+  REQUIRE(result.at(5) == "words");
+  REQUIRE(result.at(6) == "sorted");
 }
 
 TEST_CASE("order_by_descending") {
@@ -525,7 +537,13 @@ TEST_CASE("order_by_descending") {
       linq::from(&words).order_by_descending([](const std::string& word) { return word.size(); }).to_vector();
 
   REQUIRE(result.size() == 7);
-  REQUIRE(result == std::vector{"sorted"s, "hello"s, "world"s, "words"s, "here"s, "some"s, "are"s});
+  REQUIRE(result.at(0) == "sorted");
+  REQUIRE(result.at(1) == "hello");
+  REQUIRE(result.at(2) == "world");
+  REQUIRE(result.at(3) == "words");
+  REQUIRE(result.at(4) == "here");
+  REQUIRE(result.at(5) == "some");
+  REQUIRE(result.at(6) == "are");
 }
 
 TEST_CASE("then_by") {
