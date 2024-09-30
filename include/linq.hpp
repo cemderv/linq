@@ -1302,9 +1302,9 @@ public:
       m_sorted_values.push_back(val);
     }
 
-    std::sort(m_sorted_values.begin(),
-              m_sorted_values.end(),
-              [this](const container_element_t& a, const container_element_t& b) { return compare_keys(a, b); });
+    std::stable_sort(m_sorted_values.begin(),
+                     m_sorted_values.end(),
+                     [this](const container_element_t& a, const container_element_t& b) { return compare_keys(a, b); });
 
     return iterator(m_sorted_values.begin());
   }
@@ -1382,9 +1382,10 @@ public:
       m_sorted_values.emplace_back(val);
     }
 
-    std::sort(m_sorted_values.begin(),
-              m_sorted_values.end(),
-              [this](const container_element_t& a, const container_element_t& b) { return this->compare_keys(a, b); });
+    std::stable_sort(
+        m_sorted_values.begin(),
+        m_sorted_values.end(),
+        [this](const container_element_t& a, const container_element_t& b) { return this->compare_keys(a, b); });
 
     return iterator(m_sorted_values.begin());
   }
