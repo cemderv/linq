@@ -13,13 +13,10 @@
 #include <algorithm>
 #include <cassert>
 #include <initializer_list>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <vector>
-
-#if __cplusplus >= 201703L
-#include <optional>
-#endif
 
 #ifdef __cpp_lib_span
 #include <span>
@@ -27,12 +24,6 @@
 
 #ifdef __cpp_lib_concepts
 #include <concepts>
-#endif
-
-#if __cplusplus >= 201703L
-#define LINQ_NODISCARD [[nodiscard]]
-#else
-#define LINQ_NODISCARD
 #endif
 
 namespace linq {
@@ -124,7 +115,6 @@ template <typename T, typename TRange>
 #ifdef __cpp_lib_concepts
   requires(averageable<T> || number<T>)
 #endif
-#ifdef __cpp_lib_optional
 static auto calculate_average(const TRange& op) {
   using float_t  = long double;
   using output_t = typename TRange::output_t;
@@ -145,9 +135,6 @@ static auto calculate_average(const TRange& op) {
 
   return std::optional<return_t>{};
 }
-#else
-#error "not implemented"
-#endif
 
 // ----------------------------------
 // base_range
@@ -181,123 +168,123 @@ public:
    * @return A new range that combines this range with the where-range.
    */
   template <typename TPredicate>
-  LINQ_NODISCARD auto where(const TPredicate& predicate) const;
+  [[nodiscard]] auto where(const TPredicate& predicate) const;
 
   /**
    * @brief Appends a distinct-filter to the range that removes duplicate elements.
    * @return A new range that combines this range with the distinct-range.
    */
-  LINQ_NODISCARD auto distinct() const;
+  [[nodiscard]] auto distinct() const;
 
   template <typename TTransform>
-  LINQ_NODISCARD auto select(const TTransform& transform) const;
+  [[nodiscard]] auto select(const TTransform& transform) const;
 
-  LINQ_NODISCARD auto select_to_string() const;
+  [[nodiscard]] auto select_to_string() const;
 
   template <typename TTransform>
-  LINQ_NODISCARD auto select_many(const TTransform& transform) const;
+  [[nodiscard]] auto select_many(const TTransform& transform) const;
 
-  LINQ_NODISCARD auto reverse() const;
+  [[nodiscard]] auto reverse() const;
 
-  LINQ_NODISCARD auto take(size_t count) const;
-
-  template <typename TPredicate>
-  LINQ_NODISCARD auto take_while(const TPredicate& predicate) const;
-
-  LINQ_NODISCARD auto skip(size_t count) const;
+  [[nodiscard]] auto take(size_t count) const;
 
   template <typename TPredicate>
-  LINQ_NODISCARD auto skip_while(const TPredicate& predicate) const;
+  [[nodiscard]] auto take_while(const TPredicate& predicate) const;
+
+  [[nodiscard]] auto skip(size_t count) const;
+
+  template <typename TPredicate>
+  [[nodiscard]] auto skip_while(const TPredicate& predicate) const;
 
   template <typename TOtherRange>
-  LINQ_NODISCARD auto append(const TOtherRange& other_range) const;
+  [[nodiscard]] auto append(const TOtherRange& other_range) const;
 
-  LINQ_NODISCARD auto repeat(size_t count) const;
+  [[nodiscard]] auto repeat(size_t count) const;
 
   template <typename TOtherRange, typename TKeySelectorA, typename TKeySelectorB, typename TTransform>
-  LINQ_NODISCARD auto join(const TOtherRange&   other_range,
-                           const TKeySelectorA& key_selector_a,
-                           const TKeySelectorB& key_selector_b,
-                           const TTransform&    transform) const;
+  [[nodiscard]] auto join(const TOtherRange&   other_range,
+                          const TKeySelectorA& key_selector_a,
+                          const TKeySelectorB& key_selector_b,
+                          const TTransform&    transform) const;
 
   template <typename TKeySelector>
-  LINQ_NODISCARD auto order_by(const TKeySelector& key_selector, sort_direction sort_dir) const;
+  [[nodiscard]] auto order_by(const TKeySelector& key_selector, sort_direction sort_dir) const;
 
   template <typename TKeySelector>
-  LINQ_NODISCARD auto order_by_ascending(const TKeySelector& key_selector) const {
+  [[nodiscard]] auto order_by_ascending(const TKeySelector& key_selector) const {
     return order_by<TKeySelector>(key_selector, sort_direction::ascending);
   }
 
   template <typename TKeySelector>
-  LINQ_NODISCARD auto order_by_descending(const TKeySelector& key_selector) const {
+  [[nodiscard]] auto order_by_descending(const TKeySelector& key_selector) const {
     return order_by<TKeySelector>(key_selector, sort_direction::descending);
   }
 
   template <typename TKeySelector>
-  LINQ_NODISCARD auto then_by(const TKeySelector& key_selector, sort_direction sort_dir) const;
+  [[nodiscard]] auto then_by(const TKeySelector& key_selector, sort_direction sort_dir) const;
 
   template <typename TKeySelector>
-  LINQ_NODISCARD auto then_by_ascending(const TKeySelector& key_selector) const {
+  [[nodiscard]] auto then_by_ascending(const TKeySelector& key_selector) const {
     return then_by<TKeySelector>(key_selector, sort_direction::ascending);
   }
 
   template <typename TKeySelector>
-  LINQ_NODISCARD auto then_by_descending(const TKeySelector& key_selector) const {
+  [[nodiscard]] auto then_by_descending(const TKeySelector& key_selector) const {
     return then_by<TKeySelector>(key_selector, sort_direction::descending);
   }
 
-  LINQ_NODISCARD auto sum() const;
-  LINQ_NODISCARD auto min() const;
-  LINQ_NODISCARD auto max() const;
+  [[nodiscard]] auto sum() const;
+  [[nodiscard]] auto min() const;
+  [[nodiscard]] auto max() const;
 
-  LINQ_NODISCARD auto sum_and_count() const;
+  [[nodiscard]] auto sum_and_count() const;
 
-  LINQ_NODISCARD auto average() const
+  [[nodiscard]] auto average() const
 #ifdef __cpp_lib_concepts
     requires(averageable<output_t> || number<output_t>)
 #endif
   ;
 
   template <typename TAccumFunc>
-  LINQ_NODISCARD auto aggregate(const TAccumFunc& func) const;
+  [[nodiscard]] auto aggregate(const TAccumFunc& func) const;
 
-  LINQ_NODISCARD auto first() const;
+  [[nodiscard]] auto first() const;
 
-  LINQ_NODISCARD auto first_or(output_t&& default_value) const;
-
-  template <typename TPredicate>
-  LINQ_NODISCARD auto first(const TPredicate& predicate) const;
+  [[nodiscard]] auto first_or(output_t&& default_value) const;
 
   template <typename TPredicate>
-  LINQ_NODISCARD auto first_or(const TPredicate& predicate, output_t&& default_value) const;
-
-  LINQ_NODISCARD auto last() const;
-
-  LINQ_NODISCARD auto last_or(output_t&& default_value) const;
+  [[nodiscard]] auto first(const TPredicate& predicate) const;
 
   template <typename TPredicate>
-  LINQ_NODISCARD auto last(const TPredicate& predicate) const;
+  [[nodiscard]] auto first_or(const TPredicate& predicate, output_t&& default_value) const;
+
+  [[nodiscard]] auto last() const;
+
+  [[nodiscard]] auto last_or(output_t&& default_value) const;
 
   template <typename TPredicate>
-  LINQ_NODISCARD auto last_or(const TPredicate& predicate, output_t&& default_value) const;
+  [[nodiscard]] auto last(const TPredicate& predicate) const;
 
   template <typename TPredicate>
-  LINQ_NODISCARD bool any(const TPredicate& predicate) const;
+  [[nodiscard]] auto last_or(const TPredicate& predicate, output_t&& default_value) const;
 
   template <typename TPredicate>
-  LINQ_NODISCARD bool all(const TPredicate& predicate) const;
+  [[nodiscard]] bool any(const TPredicate& predicate) const;
 
   template <typename TPredicate>
-  LINQ_NODISCARD bool none(const TPredicate& predicate) const;
-
-  LINQ_NODISCARD size_t count() const;
+  [[nodiscard]] bool all(const TPredicate& predicate) const;
 
   template <typename TPredicate>
-  LINQ_NODISCARD size_t count(const TPredicate& predicate) const;
+  [[nodiscard]] bool none(const TPredicate& predicate) const;
 
-  LINQ_NODISCARD auto element_at(size_t index, output_t&& default_value) const;
+  [[nodiscard]] size_t count() const;
 
-  LINQ_NODISCARD auto to_vector() const;
+  template <typename TPredicate>
+  [[nodiscard]] size_t count(const TPredicate& predicate) const;
+
+  [[nodiscard]] auto element_at(size_t index, output_t&& default_value) const;
+
+  [[nodiscard]] auto to_vector() const;
 };
 
 // ----------------------------------
@@ -1866,7 +1853,7 @@ auto base_range<TMy, TOutput>::select(const TTransform& transform) const {
 }
 
 template <typename TMy, typename TOutput>
-LINQ_NODISCARD auto base_range<TMy, TOutput>::select_to_string() const {
+[[nodiscard]] auto base_range<TMy, TOutput>::select_to_string() const {
   return select_to_string_range<TMy>(static_cast<const TMy&>(*this));
 }
 
@@ -1954,11 +1941,7 @@ auto base_range<TMy, TOutput>::sum() const {
     }
   }
 
-#ifdef __cpp_lib_optional
   return first ? std::optional<output_t>{} : std::optional<output_t>{result};
-#else
-  return std::make_pair(!first, sum);
-#endif
 }
 
 template <typename TMy, typename TOutput>
@@ -1976,11 +1959,7 @@ auto base_range<TMy, TOutput>::min() const {
     }
   }
 
-#ifdef __cpp_lib_optional
   return first ? std::optional<output_t>{} : std::optional<output_t>{result};
-#else
-  return std::make_pair(!first, sum);
-#endif
 }
 
 template <typename TMy, typename TOutput>
@@ -1998,11 +1977,7 @@ auto base_range<TMy, TOutput>::max() const {
     }
   }
 
-#ifdef __cpp_lib_optional
   return first ? std::optional<output_t>{} : std::optional<output_t>{result};
-#else
-  return std::make_pair(!first, sum);
-#endif
 }
 
 template <typename TMy, typename TOutput>
@@ -2022,12 +1997,8 @@ auto base_range<TMy, TOutput>::sum_and_count() const {
     ++count;
   }
 
-#ifdef __cpp_lib_optional
   return first ? std::optional<std::pair<output_t, size_t>>{}
                : std::optional<std::pair<output_t, size_t>>{std::make_pair(std::move(result), count)};
-#else
-  return std::make_pair(!first, std::make_pair(std::move(result), count));
-#endif
 }
 
 template <typename TMy, typename TOutput>
@@ -2061,11 +2032,7 @@ auto base_range<TMy, TOutput>::aggregate(const TAccumFunc& func) const {
 template <typename TMy, typename TOutput>
 auto base_range<TMy, TOutput>::first() const {
   for (const auto& p : static_cast<const TMy&>(*this)) {
-#ifdef __cpp_lib_optional
     return std::optional<output_t>{p};
-#else
-    return std::make_pair(true, p);
-#endif
   }
 
   return std::optional<output_t>{};
@@ -2073,12 +2040,7 @@ auto base_range<TMy, TOutput>::first() const {
 
 template <typename TMy, typename TOutput>
 auto base_range<TMy, TOutput>::first_or(output_t&& default_value) const {
-#ifdef __cpp_lib_optional
   return this->first().value_or(std::forward<output_t>(default_value));
-#else
-  auto result = this->first();
-  return result.first ? std::forward<output_t>(default_value) : output_t{};
-#endif
 }
 
 template <typename TMy, typename TOutput>
@@ -2086,30 +2048,17 @@ template <typename TPredicate>
 auto base_range<TMy, TOutput>::first(const TPredicate& predicate) const {
   for (const auto& p : static_cast<const TMy&>(*this)) {
     if (predicate(p)) {
-#ifdef __cpp_lib_optional
       return std::optional<output_t>{p};
-#else
-      return std::make_pair(true, p);
-#endif
     }
   }
 
-#ifdef __cpp_lib_optional
   return std::optional<output_t>{};
-#else
-  return std::make_pair(false, output_t{});
-#endif
 }
 
 template <typename TMy, typename TOutput>
 template <typename TPredicate>
 auto base_range<TMy, TOutput>::first_or(const TPredicate& predicate, output_t&& default_value) const {
-#ifdef __cpp_lib_optional
   return this->first(predicate).value_or(std::forward<output_t>(default_value));
-#else
-  auto result = this->first(predicate);
-  return result.first ? std::forward<output_t>(default_value) : output_t{};
-#endif
 }
 
 template <typename TMy, typename TOutput>
@@ -2122,21 +2071,12 @@ auto base_range<TMy, TOutput>::last() const {
     first = false;
   }
 
-#ifdef __cpp_lib_optional
   return first ? std::optional<output_t>{} : std::optional<output_t>{ret};
-#else
-  return std::make_pair(!first, ret);
-#endif
 }
 
 template <typename TMy, typename TOutput>
 auto base_range<TMy, TOutput>::last_or(output_t&& default_value) const {
-#ifdef __cpp_lib_optional
   return this->last().value_or(std::forward<output_t>(default_value));
-#else
-  auto result = this->last();
-  return result.first ? std::forward<output_t>(default_value) : output_t{};
-#endif
 }
 
 template <typename TMy, typename TOutput>
@@ -2152,22 +2092,13 @@ auto base_range<TMy, TOutput>::last(const TPredicate& predicate) const {
     }
   }
 
-#ifdef __cpp_lib_optional
   return first ? std::optional<output_t>{} : std::optional<output_t>{ret};
-#else
-  return std::make_pair(!first, ret);
-#endif
 }
 
 template <typename TMy, typename TOutput>
 template <typename TPredicate>
 auto base_range<TMy, TOutput>::last_or(const TPredicate& predicate, output_t&& default_value) const {
-#ifdef __cpp_lib_optional
   return this->last(predicate).value_or(std::forward<output_t>(default_value));
-#else
-  auto result = this->last(predicate);
-  return result.first ? std::forward<output_t>(default_value) : output_t{};
-#endif
 }
 
 template <typename TMy, typename TOutput>
@@ -2287,35 +2218,35 @@ auto base_range<TMy, TOutput>::to_vector() const {
  * @endcode
  */
 template <template <typename, typename> typename C, typename T, typename A>
-LINQ_NODISCARD static auto from(const C<T, A>* container) {
+[[nodiscard]] static auto from(const C<T, A>* container) {
   return details::container_range<C<T, A>>{container};
 }
 
 // std::set
 
 template <template <typename, typename, typename> typename C, typename T, typename S, typename U>
-LINQ_NODISCARD static auto from(const C<T, S, U>* container) {
+[[nodiscard]] static auto from(const C<T, S, U>* container) {
   return details::container_range<C<T, S, U>>{container};
 }
 
 // std::array
 
 template <template <class, size_t> class C, typename T, size_t L>
-LINQ_NODISCARD static auto from(const C<T, L>* container) {
+[[nodiscard]] static auto from(const C<T, L>* container) {
   return details::container_range<C<T, L>>{container};
 }
 
 // std::map
 
 template <template <class, class, class, class> class C, typename K, typename T, typename S, typename U>
-LINQ_NODISCARD static auto from(const C<K, T, S, U>* container) {
+[[nodiscard]] static auto from(const C<K, T, S, U>* container) {
   return details::container_range<C<K, T, S, U>>{container};
 }
 
 // misc container
 
 template <template <typename> typename C, class T>
-LINQ_NODISCARD static auto from(const C<T>* container) {
+[[nodiscard]] static auto from(const C<T>* container) {
   return details::container_range<C<T>>{container};
 }
 
@@ -2324,63 +2255,51 @@ LINQ_NODISCARD static auto from(const C<T>* container) {
 // std::vector, std::list, std::dequeue, ...
 
 template <template <typename, typename> typename C, typename T, typename A>
-LINQ_NODISCARD static auto from_mutable(C<T, A>* container) {
+[[nodiscard]] static auto from_mutable(C<T, A>* container) {
   return details::mutable_container_range<C<T, A>>{container};
 }
 
 // std::set
 
 template <template <typename, typename, typename> typename C, typename T, typename S, typename U>
-LINQ_NODISCARD static auto from_mutable(C<T, S, U>* container) {
+[[nodiscard]] static auto from_mutable(C<T, S, U>* container) {
   return details::mutable_container_range<C<T, S, U>>{container};
 }
 
 // std::array
 
 template <template <class, size_t> class C, typename T, size_t L>
-LINQ_NODISCARD static auto from_mutable(C<T, L>* container) {
+[[nodiscard]] static auto from_mutable(C<T, L>* container) {
   return details::mutable_container_range<C<T, L>>{container};
 }
 
 // std::map
 
 template <template <class, class, class, class> class C, typename K, typename T, typename S, typename U>
-LINQ_NODISCARD static auto from_mutable(C<K, T, S, U>* container) {
+[[nodiscard]] static auto from_mutable(C<K, T, S, U>* container) {
   return details::mutable_container_range<C<K, T, S, U>>{container};
 }
 
 // misc container
 
 template <template <typename> typename C, class T>
-LINQ_NODISCARD static auto from_mutable(C<T>* container) {
+[[nodiscard]] static auto from_mutable(C<T>* container) {
   return details::mutable_container_range<C<T>>{container};
 }
 
-// C arrays
-
-/*
-template <typename T, size_t N>
-LINQ_NODISCARD static auto from_mutable(T (&array)[N]) {
-  return details::c_array_range<T, N>(array, array + N);
-}
-*/
-
 template <typename TContainer>
-LINQ_NODISCARD static auto from_copy(const TContainer& container) {
+[[nodiscard]] static auto from_copy(const TContainer& container) {
   return details::container_copy_range<TContainer>{container};
 }
 
-// TODO: from_move?
-// TODO: span compat?
-
 template <typename T>
-LINQ_NODISCARD static auto from(std::initializer_list<T> list) {
+[[nodiscard]] static auto from(std::initializer_list<T> list) {
   return details::initializer_list_range<T>{list};
 }
 
 #ifdef __cpp_lib_span
 template <typename T>
-LINQ_NODISCARD static auto from(std::span<const T> span) {
+[[nodiscard]] static auto from(std::span<const T> span) {
   return details::container_copy_range<std::span<const T>>{span};
 }
 #endif
@@ -2394,17 +2313,17 @@ LINQ_NODISCARD static auto from_to(const T& start, const T& end, const T& step =
 }
 
 template <typename TGenerator>
-LINQ_NODISCARD static auto generate(const TGenerator& generator) {
+[[nodiscard]] static auto generate(const TGenerator& generator) {
   return details::generator_range<TGenerator>(generator);
 }
 
 template <typename T>
-LINQ_NODISCARD static auto generate_return(const T& value) {
+[[nodiscard]] static auto generate_return(const T& value) {
   return details::generator_return_value<T>(value);
 }
 
 template <typename T>
-LINQ_NODISCARD static auto generate_finish() {
+[[nodiscard]] static auto generate_finish() {
   return details::generator_return_value<T>();
 }
 } // end namespace linq
