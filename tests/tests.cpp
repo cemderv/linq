@@ -1,4 +1,3 @@
-#include <format>
 #include <iostream>
 #include <linq.hpp>
 #include <snitch/snitch.hpp>
@@ -55,7 +54,7 @@ TEST_CASE("basic") {
     std::vector<std::string> lines;
 
     for (const auto& [name, age] : linq::from(&general_people)) {
-      lines.push_back(std::format("{}: {}", name, age));
+      lines.push_back(name + ": " + std::to_string(age));
     }
 
     REQUIRE(lines.size() == 6);
@@ -75,7 +74,7 @@ TEST_CASE("where") {
     std::vector<std::string> lines;
 
     for (const auto& [name, age] : query) {
-      lines.push_back(std::format("{}: {}", name, age));
+      lines.push_back(name + ": " + std::to_string(age));
     }
 
     REQUIRE(lines.size() == 3);
@@ -92,7 +91,7 @@ TEST_CASE("where") {
     std::vector<std::string> lines;
 
     for (const auto& [name, age] : query) {
-      lines.push_back(std::format("{}: {}", name, age));
+      lines.push_back(name + ": " + std::to_string(age));
     }
 
     REQUIRE(lines.size() == 3);
