@@ -674,7 +674,7 @@ TEST_CASE("last") {
   std::optional num2 = linq::from(&numbers).last([](int i) { return i < 3; });
 
   REQUIRE(num1.value() == 4);
-  REQUIRE(num1.value() == 2);
+  REQUIRE(num2.value() == 2);
 }
 
 TEST_CASE("any") {
@@ -686,7 +686,7 @@ TEST_CASE("any") {
   numbers.clear();
   test = linq::from(&numbers).any([](int i) { return (i % 2) == 0; });
 
-  REQUIRE(test == true);
+  REQUIRE(test == false);
 
   numbers = {1};
   test    = linq::from(&numbers).any([](int i) { return (i % 2) == 0; });
