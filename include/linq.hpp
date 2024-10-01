@@ -1697,9 +1697,7 @@ template <typename T>
 struct generator_return_value : generator_return_value_ident {
   using value_type = T;
 
-  generator_return_value()
-      : m_is_empty(true) {
-  }
+  generator_return_value() = default;
 
   explicit generator_return_value(T value)
       : m_value(std::move(value))
@@ -1718,8 +1716,8 @@ struct generator_return_value : generator_return_value_ident {
     return m_is_empty != o.m_is_empty;
   }
 
-  T    m_value;
-  bool m_is_empty;
+  T    m_value{};
+  bool m_is_empty{true};
 };
 
 template <typename TGenerator>
