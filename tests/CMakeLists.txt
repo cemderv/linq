@@ -37,3 +37,6 @@ target_link_libraries(linq_testbed
 )
 
 target_compile_features(linq_testbed PRIVATE cxx_std_17)
+
+setup_compiler_for(linq_tests)
+setup_compiler_for(linq_testbed)

@@ -19,7 +19,9 @@
       "inherits": "default",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "LINQ_BUILD_TESTS": "ON"
+        "LINQ_BUILD_TESTS": "ON",
+        "LINQ_ENABLE_CPPCHECK": "ON",
+        "LINQ_ENABLE_ADDRESS_SANITIZER": "ON"
       }
     },
     {

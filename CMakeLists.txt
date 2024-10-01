@@ -9,7 +9,13 @@ project(linq
   VERSION      0.7.0
 )
 
+# Options
 option(LINQ_BUILD_TESTS "Build linq unit tests" OFF)
+option(LINQ_ENABLE_CPPCHECK "Enable additional checks using cppcheck?" OFF)
+option(LINQ_ENABLE_HARDENING "Enable C++ compiler hardening flags?" OFF)
+option(LINQ_ENABLE_ADDRESS_SANITIZER "Enable AddressSanitizer?" OFF)
+
+include(cmake/CompilerSetup.cmake)
 
 add_library(linq INTERFACE)
 
