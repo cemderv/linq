@@ -399,8 +399,11 @@ public:
     bool contains_object(const prev_iter_t& it) {
       const auto& it_val = *it;
 
-      for (size_t i = 0; i < m_encountered_objects->size(); ++i) {
-        if (*m_encountered_objects->at(i) == it_val) {
+      const auto&  encountered_objects = *m_encountered_objects;
+      const size_t size                = encountered_objects.size();
+
+      for (size_t i = 0; i < size; ++i) {
+        if (encountered_objects[i] == it_val) {
           return true;
         }
       }
