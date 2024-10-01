@@ -298,7 +298,7 @@ public:
         : m_parent(parent)
         , m_begin(begin)
         , m_end(end) {
-      const auto& pred = *m_parent->m_predicate;
+      const auto& pred = m_parent->m_predicate;
 
       // Seek the first match.
       while (m_begin != m_end && !pred(*m_begin)) {
