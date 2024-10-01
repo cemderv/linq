@@ -108,8 +108,9 @@ TEST_CASE("begin() count") {
     auto query = linq::from(&nums);
     REQUIRE(nums.begin_call_count == 0);
 
-    for (const auto& _ : query)
-      ;
+    for (const auto& e : query) {
+      std::ignore = e;
+    }
 
     REQUIRE(nums.begin_call_count == 1);
   }
@@ -120,8 +121,9 @@ TEST_CASE("begin() count") {
     auto query = linq::from(&nums).where([](int num) { return num > 0; });
     REQUIRE(nums.begin_call_count == 0);
 
-    for (const auto& _ : query)
-      ;
+    for (const auto& e : query) {
+      std::ignore = e;
+    }
 
     REQUIRE(nums.begin_call_count == 1);
   }
@@ -133,6 +135,7 @@ TEST_CASE("item mutability") {
     auto              query = linq::from(&nums);
 
     for (auto&& item : query) {
+      std::ignore = item;
       static_assert(std::is_const_v<std::remove_reference_t<decltype(item)>>, "expected the item to be immutable");
     }
   }
@@ -142,6 +145,7 @@ TEST_CASE("item mutability") {
     const auto        query = linq::from(&nums);
 
     for (auto&& item : query) {
+      std::ignore = item;
       static_assert(std::is_const_v<std::remove_reference_t<decltype(item)>>, "expected the item to be immutable");
     }
   }
@@ -151,6 +155,7 @@ TEST_CASE("item mutability") {
     const auto  query = linq::from(&nums);
 
     for (auto&& item : query) {
+      std::ignore = item;
       static_assert(std::is_const_v<std::remove_reference_t<decltype(item)>>, "expected the item to be immutable");
     }
   }
@@ -160,6 +165,7 @@ TEST_CASE("item mutability") {
     auto        query = linq::from(&nums);
 
     for (auto&& item : query) {
+      std::ignore = item;
       static_assert(std::is_const_v<std::remove_reference_t<decltype(item)>>, "expected the item to be immutable");
     }
   }
@@ -171,6 +177,7 @@ TEST_CASE("item mutability") {
     const auto  query = linq::from_mutable(&nums);
 
     for (auto&& item : query) {
+      std::ignore = item;
       static_assert(!std::is_const_v<std::remove_reference_t<decltype(item)>>, "expected the item to be mutable");
     }
   }
@@ -180,6 +187,7 @@ TEST_CASE("item mutability") {
     auto        query = linq::from_mutable(&nums);
 
     for (auto&& item : query) {
+      std::ignore = item;
       static_assert(!std::is_const_v<std::remove_reference_t<decltype(item)>>, "expected the item to be mutable");
     }
   }

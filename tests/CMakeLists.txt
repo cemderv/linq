@@ -8,6 +8,7 @@ if (NOT TARGET snitch)
     GIT_REPOSITORY https://github.com/snitch-org/snitch.git
     GIT_TAG v1.2.5
     GIT_SHALLOW
+    SYSTEM
   )
 
   FetchContent_MakeAvailable(snitch)
