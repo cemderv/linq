@@ -1,6 +1,6 @@
 # linq - LINQ for C++
 
-linq is a header-only LINQ library for C++ 14 and newer.
+linq is a header-only LINQ library for C++ 17 and newer.
 It has no dependencies and neatly integrates into the STL by taking advantage of modern C++ features.
 
 linq ...
