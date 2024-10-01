@@ -3,10 +3,10 @@
 cmake_minimum_required(VERSION 3.15)
 
 project(linq
-  DESCRIPTION  "A header-only LINQ library for C++"
+  DESCRIPTION "A header-only LINQ library for C++"
   HOMEPAGE_URL "https://github.com/cemderv/linq"
-  LANGUAGES    CXX
-  VERSION      0.7.0
+  LANGUAGES CXX
+  VERSION 0.8.0
 )
 
 # Options
