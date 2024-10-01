@@ -10,10 +10,10 @@ jobs:
   build-linux-gcc:
     strategy:
       matrix:
-        compiler: [ gcc:10 ]
+        compiler: [ 10 ]
         config: [ Debug, Release ]
     runs-on: ubuntu-22.04
-    container: ${{matrix.compiler}}
+    container: gcc:${{matrix.compiler}}
     steps:
       - uses: actions/checkout@v4
       - name: Install prerequisites
