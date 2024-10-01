@@ -18,21 +18,8 @@ option(LINQ_ENABLE_ADDRESS_SANITIZER "Enable AddressSanitizer?" OFF)
 include(cmake/CompilerSetup.cmake)
 
 add_library(linq INTERFACE)
-
-target_sources(linq
-  INTERFACE
-  FILE_SET
-    HEADERS
-      BASE_DIRS include/
-      FILES include/linq.hpp
-)
-
-target_sources(linq
-  PRIVATE
-    include/linq.hpp
-)
-
-target_compile_features(linq INTERFACE cxx_std_11)
+target_include_directories(linq INTERFACE include)
+target_compile_features(linq INTERFACE cxx_std_17)
 
 if (LINQ_BUILD_TESTS)
   add_subdirectory(tests)
