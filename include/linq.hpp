@@ -403,7 +403,7 @@ public:
       const size_t size                = encountered_objects.size();
 
       for (size_t i = 0; i < size; ++i) {
-        if (encountered_objects[i] == it_val) {
+        if (*encountered_objects[i] == it_val) {
           return true;
         }
       }
