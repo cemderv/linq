@@ -1,4 +1,4 @@
-name: macOS:AppleClang
+name: macOS-AppleClang
 
 on:
   push:
