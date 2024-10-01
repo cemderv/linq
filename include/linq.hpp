@@ -170,7 +170,7 @@ public:
    * @return A new range that combines this range with the where-range.
    */
   template <typename TPredicate>
-  [[nodiscard]] auto where(const TPredicate& predicate) const;
+  [[nodiscard]] auto where(TPredicate&& predicate) const;
 
   /**
    * @brief Appends a distinct-filter to the range that removes duplicate elements.
@@ -315,7 +315,7 @@ public:
     }
 
     iterator& operator++() {
-      const auto& pred = *m_parent->m_predicate;
+      const auto& pred = m_parent->m_predicate;
 
       do {
         ++m_begin;
@@ -335,9 +335,9 @@ public:
 
   where_range() = default;
 
-  where_range(const TPrevRange& prev, const TPredicate& predicate)
+  where_range(const TPrevRange& prev, TPredicate predicate)
       : m_prev(prev)
-      , m_predicate(&predicate) {
+      , m_predicate(std::move(predicate)) {
   }
 
   iterator begin() const {
@@ -350,8 +350,8 @@ public:
   }
 
 private:
-  TPrevRange        m_prev;
-  const TPredicate* m_predicate;
+  TPrevRange m_prev;
+  TPredicate m_predicate;
 };
 
 // ----------------------------------
@@ -1799,8 +1799,8 @@ private:
 
 template <typename TMy, typename TOutput>
 template <typename TPredicate>
-auto base_range<TMy, TOutput>::where(const TPredicate& predicate) const {
-  return where_range<TMy, TPredicate>(static_cast<const TMy&>(*this), predicate);
+auto base_range<TMy, TOutput>::where(TPredicate&& predicate) const {
+  return where_range<TMy, TPredicate>(static_cast<const TMy&>(*this), std::forward<TPredicate>(predicate));
 }
 
 template <typename TMy, typename TOutput>
