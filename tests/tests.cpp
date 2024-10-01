@@ -1,9 +1,19 @@
 #include <iostream>
 #include <linq.hpp>
-#include <snitch/snitch.hpp>
 #include <span>
 #include <string>
 #include <vector>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
+#include <snitch/snitch.hpp>
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 using namespace std::literals;
 
