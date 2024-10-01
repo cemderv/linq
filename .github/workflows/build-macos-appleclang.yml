@@ -1,0 +1,27 @@
+name: macOS:AppleClang
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build-macos-appleclang:
+    strategy:
+      matrix:
+        os: [ macos-12, macos-13, macos-14 ]
+        config: [ Debug, Release ]
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure CMake (Xcode)
+        run: |
+          cmake -B ${{github.workspace}}/build -G Xcode -DCMAKE_BUILD_TYPE=${{matrix.config}} -DLINQ_BUILD_TESTS=ON
+
+      - name: Build (Xcode)
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.config}}
+
+      - name: Run Tests
+        run: ${{github.workspace}}/build/tests/${{matrix.config}}/linq_tests
