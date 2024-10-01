@@ -723,8 +723,9 @@ TEST_CASE("any") {
 
   REQUIRE(test == false);
 
-  numbers = {1};
-  test    = linq::from(&numbers).any([](int i) { return (i % 2) == 0; });
+  numbers.clear();
+  numbers.push_back(1);
+  test = linq::from(&numbers).any([](int i) { return (i % 2) == 0; });
 
   REQUIRE(test == false);
 }
@@ -740,8 +741,9 @@ TEST_CASE("all") {
 
   REQUIRE(test == true);
 
-  numbers = {1};
-  test    = linq::from(&numbers).all([](int i) { return i > 2; });
+  numbers.clear();
+  numbers.push_back(1);
+  test = linq::from(&numbers).all([](int i) { return i > 2; });
 
   REQUIRE(test == false);
 }
