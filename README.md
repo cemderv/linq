@@ -49,6 +49,7 @@ int main() {
 ### Container Producers
 
 - [to_vector](https://github.com/cemderv/linq/wiki/Container-Producers#to_vector)
+- [to_map / to_unordered_map](https://github.com/cemderv/linq/wiki/Container-Producers#to_map--to_unordered_map)
 
 ### Operators
 
