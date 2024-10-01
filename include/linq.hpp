@@ -121,14 +121,14 @@ template <typename T, typename TRange>
   requires(averageable<T> || number<T>)
 #endif
 static auto calculate_average(const TRange& op) {
-  using float_t  = long double;
-  using output_t = typename TRange::output_t;
+  using float_type = long double;
+  using output_t   = typename TRange::output_t;
 
 #ifdef __cpp_lib_concepts
-  using return_t = std::conditional_t<number<output_t>, float_t, output_t>;
+  using return_t = std::conditional_t<number<output_t>, float_type, output_t>;
 #else
   using return_t =
-      std::conditional_t<std::is_integral<output_t>::value || std::is_floating_point_v<output_t>, float_t, output_t>;
+      std::conditional_t<std::is_integral<output_t>::value || std::is_floating_point_v<output_t>, float_type, output_t>;
 #endif
 
   if (const auto maybe_sum_and_count = op.sum_and_count()) {
