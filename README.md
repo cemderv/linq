@@ -16,7 +16,14 @@ linq ...
 
 ---
 
-[![CMake Build](https://github.com/cemderv/linq/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/cemderv/linq/actions/workflows/cmake-multi-platform.yml)
+linq has been tested with the following compilers:
+
+- Clang 16+
+- GCC 10+
+- AppleClang 13+
+- MSVC 2019+
+
+[![Linux-Clang](https://github.com/cemderv/linq/actions/workflows/build-linux-clang.yml/badge.svg)](https://github.com/cemderv/linq/actions/workflows/build-linux-clang.yml) [![Linux-GCC](https://github.com/cemderv/linq/actions/workflows/build-linux-gcc.yml/badge.svg)](https://github.com/cemderv/linq/actions/workflows/build-linux-gcc.yml) [![macOS-AppleClang](https://github.com/cemderv/linq/actions/workflows/build-macos-appleclang.yml/badge.svg)](https://github.com/cemderv/linq/actions/workflows/build-macos-appleclang.yml) [![Windows-MSVC](https://github.com/cemderv/linq/actions/workflows/build-windows-msvc.yml/badge.svg)](https://github.com/cemderv/linq/actions/workflows/build-windows-msvc.yml)
 
 ## Examples
 
