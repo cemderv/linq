@@ -1668,7 +1668,7 @@ public:
       : m_start(std::move(start))
       , m_end(std::move(end))
       , m_step(std::move(step)) {
-    assert(start < end);
+    assert(m_start < m_end);
   }
 
   iterator begin() const {
