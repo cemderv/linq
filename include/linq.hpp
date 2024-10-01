@@ -2094,6 +2094,7 @@ size_t base_range<TMy, TOutput>::count() const {
   size_t ret{0};
 
   for (const auto& p : static_cast<const TMy&>(*this)) {
+    std::ignore = p;
     ++ret;
   }
 
