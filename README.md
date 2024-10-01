@@ -45,6 +45,7 @@ for (const Person& p : query) {
 ```
 
 Output:
+
 ```
 P2, 21
 P3, 22
@@ -143,6 +144,7 @@ double average_age = people_over_20.select(person_age).average();
 #### Producing containers
 
 `to_vector`:
+
 ```cpp
 const array numbers { 1, 2, 3, 4 };
 
@@ -156,6 +158,7 @@ vector vec = linq::from(&numbers)
 ```
 
 `to_map`:
+
 ```cpp
 const array pairs {
     pair{ 1, "str1"s },
@@ -174,6 +177,7 @@ for (const auto& [key, value] : my_map) {
 ```
 
 Output:
+
 ```
 [-10: str-10]
 [1: str1]
@@ -184,7 +188,9 @@ Output:
 
 ```cpp
 auto range1 = linq::from_to(0, 5);           // 0, 1, 2, 3, 4, 5
+
 auto range2 = linq::from_to(0.0, 1.5, 0.5);  // 0, 0.5, 1, 1.5
+
 auto range3 = linq::from_to(0, 3).repeat(1); // 0, 1, 2, 3, 0, 1, 2, 3
 
 auto range4 = linq::generate([](size_t i) {
@@ -193,7 +199,6 @@ auto range4 = linq::generate([](size_t i) {
 
     return linq::generate_finish<size_t>();
 });
-
 // range4 = 0, 2, 4, 6, 8
 ```
 
