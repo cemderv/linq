@@ -14,31 +14,192 @@ linq ...
 - does not rely on exceptions and instead reports errors at compile-time
 - uses the beloved dot operator!
 
-## Example
+---
+
+[![CMake Build](https://github.com/cemderv/linq/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/cemderv/linq/actions/workflows/cmake-multi-platform.yml)
+
+## Examples
+
+#### Intro
 
 ```cpp
 #include <linq.hpp>
 
 struct Person {
-  string name;
-  int age;
+    string name;
+    int age;
 };
 
-int main() {
-  const vector<Person> people {
+const vector<Person> people {
     { .name = "P1", .age = 20 },
     { .name = "P2", .age = 21 },
     { .name = "P3", .age = 22 },
-  };
+};
   
-  auto query = linq::from(&people)
-                    .where( [](const Person& p) { return p.age > 20; } );
+auto query = linq::from(&people)
+                  .where( [](const Person& p) { return p.age > 20; } );
                     
-  for (const Person& p : query) {
+for (const Person& p : query) {
     println("{}, {}", p.name, p.age);
-  }
 }
 ```
+
+Output:
+```
+P2, 21
+P3, 22
+```
+
+#### Aggregation
+
+```cpp
+double average_age = linq::from(&people)
+                          .select( [](const Person& p) { return p.age; } )
+                          .average();
+
+int people_over_20 = linq::from(&people)
+                          .where( [](const Person& p) { return p.age > 20; } )
+                          .count();
+```
+
+#### Element access
+
+```cpp
+const auto over_20 = [](const Person& p) { return p.age > 20; };
+const auto under_20 = [](const Person& p) { return p.age < 20; };
+
+optional<Person> first_over_20 = linq::from(&people).first(over_20);
+// first_over_20 = P2, 21
+
+optional<Person> last_over_20 = linq::from(&people).last(over_20);
+// last_over_20 = P3, 22
+
+optional<Person> first_under_20 = linq::from(&people).last(under_20);
+// first_under_20 = empty optional
+```
+
+#### Partitioning
+
+```cpp
+const vector numbers { 1, 2, 3, 4, 5, 6 };
+
+auto query1 = linq::from(&numbers).skip(3); // 4, 5, 6
+
+auto query2 = linq::from(&numbers)
+                   .skip_while( [](int i) { return i < 4; } ); // 4, 5, 6
+
+auto query3 = linq::from(&numbers).take(4); // 1, 2, 3, 4
+
+auto query4 = linq::from(&numbers)
+                   .take_while( [](int i) { return i < 4; } ); // 1, 2, 3
+```
+
+#### Sorting
+
+```cpp
+const vector words = { "hello"s, "world"s, "here"s, "are"s, "some"s, "sorted"s, "words"s };
+
+auto query = linq::from(&words)
+                  .order_by_ascending( [](const string& word) { return word.size(); } )
+                  .then_by_ascending( [](const string& word) { return word; } );
+// query = are, here, some, hello, words, world, sorted
+
+auto rev = query.reverse();
+// rev = sorted, world, words, hello, some, here, are
+```
+
+#### Concatenation
+
+```cpp
+const vector numbers1 { 1, 2, 3 };
+const vector numbers2 { 4, 5, 6 };
+
+auto range = linq::from(&numbers1)
+                  .append(linq::from(&numbers2));
+
+// range = 1, 2, 3, 4, 5, 6
+```
+
+#### Removing duplicates
+
+```cpp
+const vector numbers { 1, 2, 3, 3, 5, 4, 5, 6, 7 };
+
+const auto query = linq::from(&numbers).distinct();
+// query = 1, 2, 3, 5, 4, 6, 7
+```
+
+#### Composition
+
+```cpp
+auto people = linq::from(&people);
+auto age_over_20 = [](const Person& p) { return p.age > 20; };
+auto people_over_20 = people.where(age_over_20);
+auto person_age = [](const Person& p) { return p.age; };
+
+double average_age = people_over_20.select(person_age).average();
+```
+
+#### Producing containers
+
+`to_vector`:
+```cpp
+const array numbers { 1, 2, 3, 4 };
+
+vector vec = linq::from(&numbers)
+                  .where( [](int i) { return i > 1; } )
+                  .select_to_string()
+                  .to_vector(); // copy elements to a new std::vector
+
+// 'vec' is of type std::vector<std::string>
+// with contents ["2", "3", "4"]
+```
+
+`to_map`:
+```cpp
+const array pairs {
+    pair{ 1, "str1"s },
+    pair{ 5, "str5"s },
+    pair{ -10, "str-10"s },
+};
+
+const auto query = linq::from(&pairs)
+                        .where( [](const auto& p) { return p.first < 20; } );
+
+map my_map = query.to_map();
+
+for (const auto& [key, value] : my_map) {
+    println("[{}: {}]", key, value);
+}
+```
+
+Output:
+```
+[-10: str-10]
+[1: str1]
+[5: str5]
+```
+
+### Generation
+
+```cpp
+auto range1 = linq::from_to(0, 5);           // 0, 1, 2, 3, 4, 5
+auto range2 = linq::from_to(0.0, 1.5, 0.5);  // 0, 0.5, 1, 1.5
+auto range3 = linq::from_to(0, 3).repeat(1); // 0, 1, 2, 3, 0, 1, 2, 3
+
+auto range4 = linq::generate([](size_t i) {
+    if (i < 5)
+        return linq::generate_return(i * 2);
+
+    return linq::generate_finish<size_t>();
+});
+
+// range4 = 0, 2, 4, 6, 8
+```
+
+---
+
+Below you will find a list of all supported functions and operators.
 
 ### Query Constructors
 
