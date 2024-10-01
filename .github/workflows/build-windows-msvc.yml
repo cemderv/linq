@@ -10,7 +10,7 @@ jobs:
   build-windows-msvc:
     strategy:
       matrix:
-        os: [ windows-2022 ]
+        os: [ 2019, 2022 ]
         config: [ Debug, Release ]
     runs-on: windows-${{matrix.os}}
     steps:
