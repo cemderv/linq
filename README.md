@@ -97,7 +97,7 @@ auto query4 = linq::from(&numbers)
 #### Sorting
 
 ```cpp
-const vector words = { "hello"s, "world"s, "here"s, "are"s, "some"s, "sorted"s, "words"s };
+const vector words { "hello"s, "world"s, "here"s, "are"s, "some"s, "sorted"s, "words"s };
 
 auto query = linq::from(&words)
                   .order_by_ascending( [](const string& word) { return word.size(); } )
